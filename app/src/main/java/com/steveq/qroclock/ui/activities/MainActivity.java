@@ -1,5 +1,6 @@
 package com.steveq.qroclock.ui.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -10,6 +11,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.steveq.qroclock.R;
+import com.steveq.qroclock.service.TimeTrackerService;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -26,6 +28,9 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
+                Intent intent = new Intent(MainActivity.this, TimeTrackerService.class);
+                intent.putExtra(TimeTrackerService.EXTRA_MESSAGE, "THIS IS SERVICE");
+                startService(intent);
             }
         });
     }
