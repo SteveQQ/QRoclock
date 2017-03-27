@@ -1,6 +1,9 @@
 package com.steveq.qroclock.ui.activities;
 
 import android.app.TimePickerDialog;
+import android.content.Intent;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -35,6 +38,7 @@ import butterknife.Optional;
 
 public class MainActivity extends AppCompatActivity {
     private static String TAG = MainActivity.class.getSimpleName();
+    private static Integer GET_RINGTONE = 10;
     private View dialogView;
 
     @Nullable @BindView(R.id.alarmsRecyclerView)
@@ -45,6 +49,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Nullable @BindView(R.id.timeInputTextView)
     TextView timeInputTextView;
+
+    @Nullable @BindView(R.id.selectRingtoneButton)
+    Button selectRingtoneButton;
 
 //    private TextView timeInputTextView;
 //    private Button selectRingtoneButton;
@@ -88,7 +95,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         mManager = new RepoManager(this);
-
     }
 
     @Optional @OnClick(R.id.timeInputTextView)
@@ -96,6 +102,27 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "Time Input Clicked");
     }
 
+    @Optional @OnClick(R.id.selectRingtoneButton)
+    public void selectRingtone(View v){
+        Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
+        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Select ringtone for the alarm");
+        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false);
+        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, false);
+        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALARM);
+        startActivityForResult(intent, GET_RINGTONE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(resultCode == RESULT_OK){
+            if(requestCode == GET_RINGTONE) {
+                Uri uri = data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
+                Log.d(TAG, uri.toString());
+            }
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

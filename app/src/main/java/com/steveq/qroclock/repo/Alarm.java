@@ -8,14 +8,17 @@ public class Alarm implements Serializable{
     private String time;
     private Boolean active;
     private List<String> days;
+    private String ringtoneUri;
 
     public Alarm() {
     }
 
-    public Alarm(String time, Boolean active, List<String> days) {
-        this.time = time;
-        this.active = active;
-        this.days = days;
+    public String getRingtoneUri() {
+        return ringtoneUri;
+    }
+
+    public void setRingtoneUri(String ringtoneUri) {
+        this.ringtoneUri = ringtoneUri;
     }
 
     public String getTime() {
