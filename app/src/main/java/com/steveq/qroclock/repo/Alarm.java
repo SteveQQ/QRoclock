@@ -41,4 +41,13 @@ public class Alarm implements Serializable{
     public void setDays(List<String> days) {
         this.days = days;
     }
+
+    @Override
+    public String toString() {
+        return "Alarm{" +
+                "time='" + time + '\'' +
+                ", active=" + active +
+                ", days=" + days +
+                '}';
+    }
 }

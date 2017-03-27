@@ -30,4 +30,18 @@ public class Alarms implements Serializable{
     public void setAlarms(List<Alarm> alarms) {
         this.alarms = alarms;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("Alarms{");
+        for(Alarm a : alarms){
+            builder.append(a.toString());
+            builder.append(", ");
+        }
+        builder.append("message = ");
+        builder.append(message);
+        builder.append("}");
+        return builder.toString();
+    }
 }
