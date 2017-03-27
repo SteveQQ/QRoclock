@@ -2,4 +2,6 @@
     <string name="app_name">QRoclock</string>
     <string name="action_settings">Settings</string>
     <string name="no_alarms">no alarms</string>
+    <string name="agree">Apply</string>
+    <string name="disagree">Cancel</string>
 </resources>
