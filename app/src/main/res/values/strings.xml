@@ -4,4 +4,15 @@
     <string name="no_alarms">no alarms</string>
     <string name="agree">Apply</string>
     <string name="disagree">Cancel</string>
+    <string name="set_alarm">Set Alarm</string>
+    <string name="repeat_in">Repeat In</string>
+    <string-array name="days">
+        <item>Monday</item>
+        <item>Tuesday</item>
+        <item>Wednesday</item>
+        <item>Thursday</item>
+        <item>Friday</item>
+        <item>Saturday</item>
+        <item>Sunday</item>
+    </string-array>
 </resources>

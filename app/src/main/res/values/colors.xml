@@ -10,4 +10,12 @@
     <color name="material_deep_purple_600">#5e35b1</color>
     <color name="material_deep_purple_800">#4527a0</color>
     <color name="material_deep_purple_200">#b39ddb</color>
+    <color name="material_blue_500">#2196f3</color>
+    <color name="material_blue_700">#1976d2</color>
+    <color name="material_blue_100">#bbdefb</color>
+    <color name="material_brown_500">#795548</color>
+    <color name="material_brown_00">#5d4037</color>
+    <color name="material_deep_orange_A400">#ff3d00</color>
+    <color name="material_brown_100">#d7ccc8</color>
+    <color name="material_deep_orange_A700">#dd2c00</color>
 </resources>

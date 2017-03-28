@@ -1,6 +1,7 @@
 package com.steveq.qroclock.ui.activities;
 
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -18,6 +19,8 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -27,6 +30,7 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.steveq.qroclock.R;
 import com.steveq.qroclock.repo.Alarms;
 import com.steveq.qroclock.repo.RepoManager;
+import com.steveq.qroclock.ui.dialogs.AlarmConfigDialog;
 
 import java.util.Calendar;
 import java.util.zip.Inflater;
@@ -35,6 +39,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Optional;
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class MainActivity extends AppCompatActivity {
     private static String TAG = MainActivity.class.getSimpleName();
@@ -47,16 +52,16 @@ public class MainActivity extends AppCompatActivity {
     @Nullable @BindView(R.id.emptyRecyclerView)
     LinearLayout emptyLinearLayout;
 
-    @Nullable @BindView(R.id.timeInputTextView)
-    TextView timeInputTextView;
-
-    @Nullable @BindView(R.id.selectRingtoneButton)
-    Button selectRingtoneButton;
 
 //    private TextView timeInputTextView;
 //    private Button selectRingtoneButton;
 
     RepoManager mManager;
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,7 +72,6 @@ public class MainActivity extends AppCompatActivity {
         ButterKnife.bind(this, dialogView);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        timeInputTextView = (TextView) dialogView.findViewById(R.id.timeInputTextView);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -77,18 +81,19 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
                 Alarms a = mManager.readAlarms();
                 Log.d(TAG, a.toString());
-                new MaterialDialog.Builder(MainActivity.this)
-                        .title("Title")
-                        .customView(dialogView, true)
-                        .positiveText(R.string.agree)
-                        .negativeText(R.string.disagree)
-                        .onPositive(new MaterialDialog.SingleButtonCallback() {
-                            @Override
-                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-
-                            }
-                        })
-                        .show();
+                AlarmConfigDialog.newInstance().show(getFragmentManager(), null);
+//                new MaterialDialog.Builder(MainActivity.this)
+//                        .title(R.string.set_alarm)
+//                        .customView(dialogView, true)
+//                        .positiveText(R.string.agree)
+//                        .negativeText(R.string.disagree)
+//                        .onPositive(new MaterialDialog.SingleButtonCallback() {
+//                            @Override
+//                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+//
+//                            }
+//                        })
+//                        .show();
 //                Intent intent = new Intent(MainActivity.this, TimeTrackerService.class);
 //                intent.putExtra(TimeTrackerService.EXTRA_MESSAGE, "THIS IS SERVICE");
 //                startService(intent);
@@ -110,6 +115,29 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, false);
         intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALARM);
         startActivityForResult(intent, GET_RINGTONE);
+    }
+
+    @Optional @OnClick(R.id.repeatingCheckbox)
+    public void checkRepeating(View v){
+        new MaterialDialog.Builder(this)
+                .title(R.string.repeat_in)
+                .items(R.array.days)
+                .positiveText(R.string.agree)
+                .negativeText(R.string.disagree)
+                .itemsCallbackMultiChoice(null, new MaterialDialog.ListCallbackMultiChoice() {
+                    @Override
+                    public boolean onSelection(MaterialDialog dialog, Integer[] which, CharSequence[] text) {
+                        /**
+                         * If you use alwaysCallMultiChoiceCallback(), which is discussed below,
+                         * returning false here won't allow the newly selected check box to actually be selected
+                         * (or the newly unselected check box to be unchecked).
+                         * See the limited multi choice dialog example in the sample project for details.
+                         **/
+                        Log.d(TAG, "Prompt checked? " + dialog.isPromptCheckBoxChecked());
+                        return true;
+                    }
+                })
+                .show();
     }
 
     @Override

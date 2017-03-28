@@ -5,5 +5,11 @@
         <item name="windowNoTitle">true</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="md_dark_theme">false</item>
+        <item name="md_background_color">@color/material_brown_100</item>
+        <item name="md_title_color">@color/material_deep_orange_A700</item>
+        <item name="md_positive_color">@color/material_deep_orange_A700</item>
+        <item name="md_neutral_color">@color/material_deep_orange_A700</item>
+        <item name="md_negative_color">@color/material_deep_orange_A700</item>
     </style>
 </resources>
