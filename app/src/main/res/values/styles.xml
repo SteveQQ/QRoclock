@@ -12,6 +12,8 @@
 
         <!--Apply default style for alarm dialog -->
         <item name="android:alertDialogTheme">@style/AppAlarmTheme</item>
+
+        <item name="android:dialogTheme">@style/AppAlarmTheme</item>
     </style>
 
     <style name="AppTheme.NoActionBar">
@@ -26,5 +28,15 @@
     <style name="AppAlarmTheme" parent="Theme.AppCompat.Light.Dialog">
         <item name="android:windowBackground">@color/material_brown_00</item>
         <item name="android:textColor">@color/material_deep_orange_A700</item>
+        <item name="colorAccent">@color/material_brown_00</item>
+    </style>
+
+    <style name="AppTimePickerTheme" parent="Theme.AppCompat.Light.Dialog">
+        <item name="android:windowBackground">@color/material_brown_00</item>
+        <item name="android:textColor">@color/material_deep_orange_A700</item>
+        <item name="colorAccent">@color/material_brown_00</item>
+        <item name="colorPrimaryDark">@color/material_brown_500</item>
+        <item name="android:colorBackground">@color/material_brown_500</item>
+
     </style>
 </resources>

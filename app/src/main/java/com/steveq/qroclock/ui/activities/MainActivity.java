@@ -20,9 +20,12 @@ import android.view.View;
 import android.widget.LinearLayout;
 
 import com.steveq.qroclock.R;
+import com.steveq.qroclock.repo.Alarm;
 import com.steveq.qroclock.repo.Alarms;
 import com.steveq.qroclock.repo.RepoManager;
 import com.steveq.qroclock.ui.dialogs.AlarmConfigDialog;
+
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -30,10 +33,10 @@ import butterknife.OnClick;
 import butterknife.Optional;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements DataCollector{
     private static String TAG = MainActivity.class.getSimpleName();
-    private static Integer GET_RINGTONE = 10;
     private View dialogView;
+    private Alarm mAlarm;
 
     @Nullable @BindView(R.id.alarmsRecyclerView)
     RecyclerView alarmsRecyclerView;
@@ -66,29 +69,10 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-                Alarms a = mManager.readAlarms();
-                Log.d(TAG, a.toString());
                 AlarmConfigDialog.newInstance().show(getFragmentManager(), null);
             }
         });
         mManager = new RepoManager(this);
-    }
-
-    @Optional @OnClick(R.id.timeInputTextView)
-    public void inputTimeClick(View v){
-        Log.d(TAG, "Time Input Clicked");
-    }
-
-    @Optional @OnClick(R.id.selectRingtoneButton)
-    public void selectRingtone(View v){
-        Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
-        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Select ringtone for the alarm");
-        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false);
-        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, false);
-        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALARM);
-        startActivityForResult(intent, GET_RINGTONE);
     }
 
     @Override
@@ -96,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if(resultCode == RESULT_OK){
-            if(requestCode == GET_RINGTONE) {
+            if(requestCode == AlarmConfigDialog.GET_RINGTONE) {
                 Uri uri = data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
                 Log.d(TAG, uri.toString());
             }
@@ -123,5 +107,30 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void shell() {
+        mAlarm = new Alarm();
+    }
+
+    @Override
+    public void withTime(String time) {
+        mAlarm.setTime(time);
+    }
+
+    @Override
+    public void withRepetition(List<String> days) {
+        mAlarm.setDays(days);
+    }
+
+    @Override
+    public void withRingtone(String ringtone) {
+        mAlarm.setRingtoneUri(ringtone);
+    }
+
+    @Override
+    public Alarm build() {
+        return mAlarm;
     }
 }
