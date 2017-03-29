@@ -9,6 +9,9 @@
         <item name="android:textColorPrimaryInverse">@color/material_light_blue_300</item>
         <item name="android:colorBackground">@color/material_brown_100</item>
         <item name="android:textColorPrimary">@android:color/primary_text_dark</item>
+
+        <!--Apply default style for alarm dialog -->
+        <item name="android:alertDialogTheme">@style/AppAlarmTheme</item>
     </style>
 
     <style name="AppTheme.NoActionBar">
@@ -20,4 +23,8 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"/>
 
+    <style name="AppAlarmTheme" parent="Theme.AppCompat.Light.Dialog">
+        <item name="android:windowBackground">@color/material_brown_00</item>
+        <item name="android:textColor">@color/material_deep_orange_A700</item>
+    </style>
 </resources>

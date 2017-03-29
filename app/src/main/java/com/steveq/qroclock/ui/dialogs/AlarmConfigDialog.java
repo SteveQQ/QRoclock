@@ -1,8 +1,10 @@
 package com.steveq.qroclock.ui.dialogs;
 
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -52,24 +54,64 @@ public class AlarmConfigDialog extends DialogFragment {
         super.onCreate(savedInstanceState);
     }
 
-    @Nullable
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.alarm_config_dialog, container);
-        ButterKnife.bind(getActivity(), view);
 
-        return view;
+    @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        LayoutInflater inflater = getActivity().getLayoutInflater();
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
+                                            .setView(inflater.inflate(R.layout.alarm_config_dialog, null))
+                                            .setPositiveButton(R.string.agree, null)
+                                            .setNegativeButton(R.string.disagree, null);
+
+        final AlertDialog alertDialog = builder.create();
+
+        alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialog) {
+                Button positiveButton = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                positiveButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
+                                                                                    .setTitle("Hello")
+                                                                                    .setPositiveButton(R.string.agree, null)
+                                                                                    .setNegativeButton(R.string.disagree, null);
+                        builder.create().show();
+                    }
+                });
+
+                Button negativeButton = alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE);
+                negativeButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        alertDialog.dismiss();
+                    }
+                });
+            }
+        });
+//                                            .setPositiveButton(R.string.agree, new DialogInterface.OnClickListener() {
+//                                                @Override
+//                                                public void onClick(DialogInterface dialog, int which) {
+////                                                    FragmentTransaction ft = getFragmentManager().beginTransaction();
+////                                                    ft.addToBackStack(null);
+////                                                    DaysRepeatingDialog.newInstance().show(ft, null);
+//                                                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
+//                                                                                    .setTitle("Hello")
+//                                                                                    .setPositiveButton(R.string.agree, null)
+//                                                                                    .setNegativeButton(R.string.disagree, null);
+//                                                    builder.create().show();
+//
+//                                                }
+//                                            })
+//                                            .setNegativeButton(R.string.disagree, null);
+        return alertDialog;
     }
 
     @Optional
     @OnClick(R.id.timeInputTextView)
     public void inputTimeClick(View v){
         Log.d(TAG, "Time Input Clicked");
-    }
-
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
     }
 
     @Override
