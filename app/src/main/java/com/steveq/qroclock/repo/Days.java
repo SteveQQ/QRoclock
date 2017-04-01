@@ -2,13 +2,23 @@ package com.steveq.qroclock.repo;
 
 
 public enum Days {
-    MONDAY,
-    TUESDAY,
-    WEDNESDAY,
-    THURSDAY,
-    FRIDAY,
-    SATURDAY,
-    SUNDAY;
+    MONDAY(1, "mon."),
+    TUESDAY(2, "tue."),
+    WEDNESDAY(3, "wed."),
+    THURSDAY(4, "thu."),
+    FRIDAY(5, "fri."),
+    SATURDAY(6, "sat."),
+    SUNDAY(7, "sun.");
 
-    Days(){}
+    Integer dayNum;
+    String abb;
+
+    Days(Integer dayNum, String abb){
+        this.dayNum = dayNum;
+        this.abb = abb;
+    }
+
+    public String getAbb() {
+        return abb;
+    }
 }

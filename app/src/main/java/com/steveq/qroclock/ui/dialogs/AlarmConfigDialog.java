@@ -1,19 +1,28 @@
 package com.steveq.qroclock.ui.dialogs;
 
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.app.FragmentTransaction;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.media.Ringtone;
 import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.steveq.qroclock.R;
+import com.steveq.qroclock.repo.Alarm;
+import com.steveq.qroclock.repo.Days;
 import com.steveq.qroclock.ui.activities.DataCollector;
 
 import butterknife.BindView;
@@ -22,54 +31,38 @@ import butterknife.OnClick;
 
 public class AlarmConfigDialog extends DialogFragment {
     private static String TAG = AlarmConfigDialog.class.getSimpleName();
-    DataCollector mDataCollector;
+    private DataCollector mDataCollector;
 
     public static final Integer GET_RINGTONE = 10;
 
+    @BindView(R.id.bodyField)
+    LinearLayout bodyField;
+
     @BindView(R.id.timeInputField)
-    LinearLayout timeInputTextView;
+    LinearLayout timeInputField;
 
     @BindView(R.id.repeatingCheckbox)
     CheckBox repeatingCheckbox;
 
     @BindView(R.id.selectRingtoneField)
-    LinearLayout selectRingtoneButton;
+    LinearLayout selectRingtoneField;
 
     public AlarmConfigDialog() {
         //empty constructor required for DialogFragment
     }
 
-    public static AlarmConfigDialog newInstance(/*some arguments*/){
-        AlarmConfigDialog frag = new AlarmConfigDialog();
-        //pack arguments into bundle
-        //Bundle args = new Bundle();
-        //attach bundle into fragment
-        //return fragment
-        //fetch arguments later in onViewCreated();
-        return frag;
+    public static AlarmConfigDialog newInstance(){
+        return new AlarmConfigDialog();
     }
+
+    //-------LIFECYCLE METHODS START--------//
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mDataCollector = (DataCollector)getActivity();
-        mDataCollector.shell();
+        mDataCollector = (DataCollector) getActivity();
+        mDataCollector.init();
     }
-
-//    @Nullable
-//    @Override
-//    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-//        View view = inflater.inflate(R.layout.alarm_config_dialog, container, false);
-////        timeInputTextView = (TextView) view.findViewById(R.id.timeInputTextView);
-////
-////        timeInputTextView.setOnClickListener(new View.OnClickListener() {
-////            @Override
-////            public void onClick(View v) {
-////                Log.d(TAG, "Time Input Clicked");
-////            }
-////        });
-//        return view;
-//    }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -77,58 +70,41 @@ public class AlarmConfigDialog extends DialogFragment {
         View v = inflater.inflate(R.layout.alarm_config_dialog, null);
         ButterKnife.bind(this, v);
 
-        //default logic of alert dialog is to dismiss dialog on positive OR negative button clicked
-        //to implement nested dialog it was necessary to override this default behavior
-        //to accomplish this, leave positive and negative buttons action as NULL ad implement
-        //onShowListener outside the AlertBuilder
-
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
-                                            .setView(v)
-                                            .setPositiveButton(R.string.agree, null)
-                                            .setNegativeButton(R.string.disagree, null);
+                .setView(v)
+                .setPositiveButton(R.string.agree, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Alarm a = mDataCollector.getInstance();
+                    }
+                })
+                .setNegativeButton(R.string.disagree, null);
 
-        AlertDialog alertDialog = builder.create();
-
-//        alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
-//            @Override
-//            public void onShow(DialogInterface dialog) {
-//                Button positiveButton = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
-//                positiveButton.setOnClickListener(new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View v) {
-//                        alertDialog.dismiss();
-//                    }
-//                });
-//
-//                Button negativeButton = alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE);
-//                negativeButton.setOnClickListener(new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View v) {
-//                        alertDialog.dismiss();
-//                    }
-//                });
-//            }
-//        });
-
-;
-        return alertDialog;
+        return builder.create();
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
+    public void onDismiss(DialogInterface dialog) {
+        super.onDismiss(dialog);
     }
+
+    //-------LIFECYCLE METHODS END--------//
+
+    //-------HANDLERS METHODS START-------//
 
     @OnClick(R.id.timeInputField)
     public void inputTimeClick(View v){
-        MyTimePickerDialog.newInstance().show(getFragmentManager(), null);
+        FragmentTransaction ft = getChildFragmentManager().beginTransaction();
+        ft.addToBackStack(null);
+        MyTimePickerDialog.newInstance().show(ft, null);
     }
 
     @OnClick(R.id.repeatingCheckbox)
     public void checkboxClicked(View v) {
         if(repeatingCheckbox.isChecked()) {
-            DaysRepeatingDialog.newInstance().show(getFragmentManager(), null);
+            FragmentTransaction ft = getChildFragmentManager().beginTransaction();
+            ft.addToBackStack(null);
+            DaysRepeatingDialog.newInstance().show(ft, null);
         }
     }
 
@@ -142,8 +118,43 @@ public class AlarmConfigDialog extends DialogFragment {
         startActivityForResult(intent, GET_RINGTONE);
     }
 
+    //-------HANDLERS METHODS END---------//
+
+
     @Override
-    public void onDismiss(DialogInterface dialog) {
-        super.onDismiss(dialog);
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(resultCode == Activity.RESULT_OK){
+            if(requestCode == AlarmConfigDialog.GET_RINGTONE) {
+                TextView chosenRingtone = (TextView) selectRingtoneField.findViewById(R.id.chosenRingtoneTextView);
+
+                Uri uri = data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
+                Ringtone ringtone = RingtoneManager.getRingtone(getActivity(), uri);
+
+                mDataCollector.withRingtone(uri.toString());
+                chosenRingtone.setText(ringtone.getTitle(getActivity()));
+                chosenRingtone.setVisibility(View.VISIBLE);
+            }
+        }
     }
+
+    public void updateTime(){
+        TextView timeText = (TextView) timeInputField.findViewById(R.id.timeInputTextView);
+        timeText.setText(mDataCollector.getInstance().getTime());
+    }
+
+    public void updateDaysRep(){
+        TextView reps = (TextView) bodyField.findViewById(R.id.daysRepeatingTextView);
+        StringBuilder builder = new StringBuilder();
+        for(Days d : mDataCollector.getInstance().getDays()){
+            builder.append(d.getAbb());
+            builder.append(",");
+            Log.d(TAG, d.getAbb());
+        }
+        builder.deleteCharAt(builder.length()-1);
+        reps.setText(builder.toString());
+        reps.setVisibility(View.VISIBLE);
+    }
+
 }

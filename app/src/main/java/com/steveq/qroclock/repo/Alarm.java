@@ -7,10 +7,20 @@ import java.util.List;
 public class Alarm implements Serializable{
     private String time;
     private Boolean active;
-    private List<String> days;
+    private List<Days> days;
     private String ringtoneUri;
+    private String ringtoneName;
 
     public Alarm() {
+        this.setActive(true);
+    }
+
+    public String getRingtoneName() {
+        return ringtoneName;
+    }
+
+    public void setRingtoneName(String ringtoneName) {
+        this.ringtoneName = ringtoneName;
     }
 
     public String getRingtoneUri() {
@@ -37,11 +47,11 @@ public class Alarm implements Serializable{
         this.active = active;
     }
 
-    public List<String> getDays() {
+    public List<Days> getDays() {
         return days;
     }
 
-    public void setDays(List<String> days) {
+    public void setDays(List<Days> days) {
         this.days = days;
     }
 

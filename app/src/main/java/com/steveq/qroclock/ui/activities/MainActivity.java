@@ -22,6 +22,7 @@ import android.widget.LinearLayout;
 import com.steveq.qroclock.R;
 import com.steveq.qroclock.repo.Alarm;
 import com.steveq.qroclock.repo.Alarms;
+import com.steveq.qroclock.repo.Days;
 import com.steveq.qroclock.repo.RepoManager;
 import com.steveq.qroclock.ui.dialogs.AlarmConfigDialog;
 
@@ -35,18 +36,19 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class MainActivity extends AppCompatActivity implements DataCollector{
     private static String TAG = MainActivity.class.getSimpleName();
-    private View dialogView;
     private Alarm mAlarm;
 
-    @Nullable @BindView(R.id.alarmsRecyclerView)
+    @BindView(R.id.alarmsRecyclerView)
     RecyclerView alarmsRecyclerView;
 
-    @Nullable @BindView(R.id.emptyRecyclerView)
+    @BindView(R.id.emptyRecyclerView)
     LinearLayout emptyLinearLayout;
 
+    @BindView(R.id.fab)
+    FloatingActionButton fab;
 
-//    private TextView timeInputTextView;
-//    private Button selectRingtoneButton;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
 
     RepoManager mManager;
 
@@ -59,20 +61,19 @@ public class MainActivity extends AppCompatActivity implements DataCollector{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        dialogView = LayoutInflater.from(this).inflate(R.layout.alarm_config_dialog, null, false);
+
         ButterKnife.bind(this);
-        ButterKnife.bind(this, dialogView);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                AlarmConfigDialog.newInstance().show(getFragmentManager(), null);
-            }
-        });
         mManager = new RepoManager(this);
+    }
+
+    @OnClick(R.id.fab)
+    public void fabClick(View v){
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        ft.addToBackStack(null);
+        AlarmConfigDialog.newInstance().show(ft, null);
     }
 
     @Override
@@ -110,7 +111,7 @@ public class MainActivity extends AppCompatActivity implements DataCollector{
     }
 
     @Override
-    public void shell() {
+    public void init() {
         mAlarm = new Alarm();
     }
 
@@ -120,7 +121,7 @@ public class MainActivity extends AppCompatActivity implements DataCollector{
     }
 
     @Override
-    public void withRepetition(List<String> days) {
+    public void withRepetition(List<Days> days) {
         mAlarm.setDays(days);
     }
 
@@ -130,7 +131,12 @@ public class MainActivity extends AppCompatActivity implements DataCollector{
     }
 
     @Override
-    public Alarm build() {
+    public void withRingtoneName(String name) {
+        mAlarm.setRingtoneName(name);
+    }
+
+    @Override
+    public Alarm getInstance() {
         return mAlarm;
     }
 }

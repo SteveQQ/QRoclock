@@ -23,6 +23,7 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/bodyField"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -52,9 +53,8 @@
                 android:layout_height="wrap_content"
                 android:textSize="28sp"
                 tools:text="12:12"
-                android:text="12:12"
                 android:textColor="@android:color/primary_text_dark"
-                android:ems="2"/>
+                android:ems="3"/>
         </LinearLayout>
 
         <LinearLayout
@@ -74,13 +74,28 @@
                 android:paddingEnd="4dp"
                 android:background="@android:color/transparent"/>
 
-            <TextView
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textColor="@android:color/primary_text_dark"
-                android:paddingTop="4dp"
-                android:text="@string/ringtone"/>
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textColor="@android:color/primary_text_dark"
+                    android:paddingTop="4dp"
+                    android:text="@string/ringtone"/>
+
+                <TextView
+                    android:id="@+id/chosenRingtoneTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="@android:color/primary_text_dark"
+                    android:paddingTop="4dp"
+                    tools:text="Beep-Beep-Beep Alarm"
+                    android:visibility="gone"/>
+            </LinearLayout>
         </LinearLayout>
 
         <CheckBox
@@ -93,7 +108,19 @@
             android:textColor="@android:color/primary_text_dark"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
-            android:layout_marginBottom="16dp"/>
+            android:layout_marginBottom="4dp"/>
+        <TextView
+            android:id="@+id/daysRepeatingTextView"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="@android:color/primary_text_dark"
+            android:layout_marginStart="50dp"
+            android:layout_marginBottom="16dp"
+            tools:text="mon., tue., wed., thu., fri., sat., sun."
+            android:ellipsize="none"
+            android:scrollHorizontally="false"
+            android:maxLines="100"/>
     </LinearLayout>
 
 
