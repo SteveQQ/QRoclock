@@ -10,6 +10,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -18,8 +19,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
 import com.steveq.qroclock.R;
+import com.steveq.qroclock.adapters.AlarmsRecyclerViewAdapter;
 import com.steveq.qroclock.repo.Alarm;
 import com.steveq.qroclock.repo.Alarms;
 import com.steveq.qroclock.repo.Days;
@@ -37,12 +40,13 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 public class MainActivity extends AppCompatActivity implements DataCollector{
     private static String TAG = MainActivity.class.getSimpleName();
     private Alarm mAlarm;
+    private AlarmsRecyclerViewAdapter mAdapter;
 
     @BindView(R.id.alarmsRecyclerView)
     RecyclerView alarmsRecyclerView;
 
     @BindView(R.id.emptyRecyclerView)
-    LinearLayout emptyLinearLayout;
+    RelativeLayout emptyLinearLayout;
 
     @BindView(R.id.fab)
     FloatingActionButton fab;
@@ -52,10 +56,9 @@ public class MainActivity extends AppCompatActivity implements DataCollector{
 
     RepoManager mManager;
 
-    @Override
-    protected void attachBaseContext(Context newBase) {
-        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
-    }
+
+
+    //-------LIFECYCLE METHODS START--------//
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,25 +70,21 @@ public class MainActivity extends AppCompatActivity implements DataCollector{
         setSupportActionBar(toolbar);
 
         mManager = new RepoManager(this);
+        mAdapter = new AlarmsRecyclerViewAdapter(this, mManager);
+
+        alarmsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        alarmsRecyclerView.setAdapter(mAdapter);
+
+        adjustRecyclerViewSpace();
     }
 
-    @OnClick(R.id.fab)
-    public void fabClick(View v){
-        FragmentTransaction ft = getFragmentManager().beginTransaction();
-        ft.addToBackStack(null);
-        AlarmConfigDialog.newInstance().show(ft, null);
-    }
+    //-------LIFECYCLE METHODS END--------//
+
+    //-------CONFIG METHODS START--------//
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if(resultCode == RESULT_OK){
-            if(requestCode == AlarmConfigDialog.GET_RINGTONE) {
-                Uri uri = data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
-                Log.d(TAG, uri.toString());
-            }
-        }
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
 
     @Override
@@ -110,6 +109,48 @@ public class MainActivity extends AppCompatActivity implements DataCollector{
         return super.onOptionsItemSelected(item);
     }
 
+    //-------CONFIG METHODS END--------//
+
+    //-------HANDLERS METHODS START----//
+
+    @OnClick(R.id.fab)
+    public void fabClick(View v){
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        ft.addToBackStack(null);
+        AlarmConfigDialog.newInstance(false).show(ft, null);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(resultCode == RESULT_OK){
+            if(requestCode == AlarmConfigDialog.GET_RINGTONE) {
+                Uri uri = data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
+                Log.d(TAG, uri.toString());
+            }
+        }
+    }
+
+    //-------HANDLERS METHODS END----//
+
+    public void formConfirmed(){
+        adjustRecyclerViewSpace();
+        mAdapter.update();
+    }
+
+    private void adjustRecyclerViewSpace() {
+        Alarms curAlarms = mManager.readAlarms();
+        if(curAlarms.getAlarms().size() == 0){
+            alarmsRecyclerView.setVisibility(View.GONE);
+            emptyLinearLayout.setVisibility(View.VISIBLE);
+        } else if(curAlarms.getAlarms().size() > 0){
+            alarmsRecyclerView.setVisibility(View.VISIBLE);
+            emptyLinearLayout.setVisibility(View.GONE);
+        }
+    }
+
+
     @Override
     public void init() {
         mAlarm = new Alarm();
@@ -128,11 +169,6 @@ public class MainActivity extends AppCompatActivity implements DataCollector{
     @Override
     public void withRingtone(String ringtone) {
         mAlarm.setRingtoneUri(ringtone);
-    }
-
-    @Override
-    public void withRingtoneName(String name) {
-        mAlarm.setRingtoneName(name);
     }
 
     @Override

@@ -11,6 +11,5 @@ public interface DataCollector {
     void withTime(String time);
     void withRepetition(List<Days> days);
     void withRingtone(String ringtone);
-    void withRingtoneName(String name);
     Alarm getInstance();
 }

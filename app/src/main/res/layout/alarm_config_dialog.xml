@@ -27,6 +27,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
+        android:paddingBottom="16dp"
         android:background="@drawable/textlines">
 
         <LinearLayout
@@ -52,6 +53,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="28sp"
+                android:text="--:--"
                 tools:text="12:12"
                 android:textColor="@android:color/primary_text_dark"
                 android:ems="3"/>
@@ -116,12 +118,22 @@
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="@android:color/primary_text_dark"
             android:layout_marginStart="50dp"
-            android:layout_marginBottom="16dp"
             tools:text="mon., tue., wed., thu., fri., sat., sun."
             android:ellipsize="none"
             android:scrollHorizontally="false"
-            android:maxLines="100"/>
+            android:maxLines="100"
+            android:visibility="gone"/>
+        <ImageButton
+            android:id="@+id/deleteAlarmImageButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/ic_bin_vec"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="16dp"
+            android:paddingStart="2dp"
+            android:paddingEnd="4dp"
+            android:background="@android:color/transparent"/>
     </LinearLayout>
-
 
 </LinearLayout>

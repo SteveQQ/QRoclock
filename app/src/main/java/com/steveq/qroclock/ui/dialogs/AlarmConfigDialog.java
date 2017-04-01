@@ -16,14 +16,20 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.steveq.qroclock.R;
 import com.steveq.qroclock.repo.Alarm;
 import com.steveq.qroclock.repo.Days;
+import com.steveq.qroclock.repo.RepoManager;
 import com.steveq.qroclock.ui.activities.DataCollector;
+import com.steveq.qroclock.ui.activities.MainActivity;
+
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -31,7 +37,10 @@ import butterknife.OnClick;
 
 public class AlarmConfigDialog extends DialogFragment {
     private static String TAG = AlarmConfigDialog.class.getSimpleName();
+    private static String DELETABLE = "DELETABLE";
     private DataCollector mDataCollector;
+    private RepoManager mRepoManager;
+    private MainActivity mParent;
 
     public static final Integer GET_RINGTONE = 10;
 
@@ -47,12 +56,19 @@ public class AlarmConfigDialog extends DialogFragment {
     @BindView(R.id.selectRingtoneField)
     LinearLayout selectRingtoneField;
 
+    @BindView(R.id.deleteAlarmImageButton)
+    ImageButton deleteAlarmImageButton;
+
     public AlarmConfigDialog() {
         //empty constructor required for DialogFragment
     }
 
-    public static AlarmConfigDialog newInstance(){
-        return new AlarmConfigDialog();
+    public static AlarmConfigDialog newInstance(Boolean isDeletable){
+        AlarmConfigDialog frag = new AlarmConfigDialog();
+        Bundle args = new Bundle();
+        args.putBoolean(DELETABLE, isDeletable);
+        frag.setArguments(args);
+        return frag;
     }
 
     //-------LIFECYCLE METHODS START--------//
@@ -60,25 +76,37 @@ public class AlarmConfigDialog extends DialogFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mDataCollector = (DataCollector) getActivity();
+        mParent = (MainActivity) getActivity();
+        mDataCollector = mParent;
         mDataCollector.init();
+        mRepoManager = new RepoManager(mParent);
     }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        LayoutInflater inflater = LayoutInflater.from(getActivity());
+        LayoutInflater inflater = LayoutInflater.from(mParent);
         View v = inflater.inflate(R.layout.alarm_config_dialog, null);
         ButterKnife.bind(this, v);
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
+        AlertDialog.Builder builder = new AlertDialog.Builder(mParent)
                 .setView(v)
                 .setPositiveButton(R.string.agree, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         Alarm a = mDataCollector.getInstance();
+                        mRepoManager.saveAlarm(a);
+                        mParent.formConfirmed();
                     }
                 })
                 .setNegativeButton(R.string.disagree, null);
+
+
+        Boolean isDeletable = getArguments().getBoolean(DELETABLE);
+        if(isDeletable){
+            deleteAlarmImageButton.setVisibility(View.VISIBLE);
+        } else {
+            deleteAlarmImageButton.setVisibility(View.GONE);
+        }
 
         return builder.create();
     }
@@ -130,10 +158,10 @@ public class AlarmConfigDialog extends DialogFragment {
                 TextView chosenRingtone = (TextView) selectRingtoneField.findViewById(R.id.chosenRingtoneTextView);
 
                 Uri uri = data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
-                Ringtone ringtone = RingtoneManager.getRingtone(getActivity(), uri);
+                Ringtone ringtone = RingtoneManager.getRingtone(mParent, uri);
 
                 mDataCollector.withRingtone(uri.toString());
-                chosenRingtone.setText(ringtone.getTitle(getActivity()));
+                chosenRingtone.setText(ringtone.getTitle(mParent));
                 chosenRingtone.setVisibility(View.VISIBLE);
             }
         }
@@ -146,15 +174,18 @@ public class AlarmConfigDialog extends DialogFragment {
 
     public void updateDaysRep(){
         TextView reps = (TextView) bodyField.findViewById(R.id.daysRepeatingTextView);
-        StringBuilder builder = new StringBuilder();
-        for(Days d : mDataCollector.getInstance().getDays()){
-            builder.append(d.getAbb());
-            builder.append(",");
-            Log.d(TAG, d.getAbb());
+        List<Days> days = mDataCollector.getInstance().getDays();
+        if(days.size() > 0) {
+            StringBuilder builder = new StringBuilder();
+            for (Days d : days) {
+                builder.append(d.getAbb());
+                builder.append(",");
+                Log.d(TAG, d.getAbb());
+            }
+            builder.deleteCharAt(builder.length() - 1);
+            reps.setText(builder.toString());
+            reps.setVisibility(View.VISIBLE);
         }
-        builder.deleteCharAt(builder.length()-1);
-        reps.setText(builder.toString());
-        reps.setVisibility(View.VISIBLE);
     }
 
 }

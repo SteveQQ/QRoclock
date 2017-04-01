@@ -9,18 +9,9 @@ public class Alarm implements Serializable{
     private Boolean active;
     private List<Days> days;
     private String ringtoneUri;
-    private String ringtoneName;
 
     public Alarm() {
         this.setActive(true);
-    }
-
-    public String getRingtoneName() {
-        return ringtoneName;
-    }
-
-    public void setRingtoneName(String ringtoneName) {
-        this.ringtoneName = ringtoneName;
     }
 
     public String getRingtoneUri() {

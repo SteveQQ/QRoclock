@@ -34,23 +34,29 @@
             android:id="@+id/alarmsRecyclerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingLeft="@dimen/activity_horizontal_margin"
-            android:paddingRight="@dimen/activity_horizontal_margin"
-            />
-        <LinearLayout
+            android:padding="16dp"/>
+
+        <RelativeLayout
             android:id="@+id/emptyRecyclerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:visibility="gone">
             <ImageView
+                android:id="@+id/emptyImageView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:srcCompat="@drawable/ic_empty_vec"/>
+                app:srcCompat="@drawable/ic_empty_vec"
+                android:layout_centerVertical="true"
+                android:layout_centerHorizontal="true"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="#616161"
+                android:layout_below="@+id/emptyImageView"
+                android:layout_centerHorizontal="true"
                 android:text="@string/no_alarms"/>
-        </LinearLayout>
+        </RelativeLayout>
     </LinearLayout>
 
     <android.support.design.widget.FloatingActionButton

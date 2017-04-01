@@ -27,7 +27,7 @@ public class RepoManager {
     public RepoManager(Context context) {
         mContext = context;
         mGson = new Gson();
-        dummyAlarms = new Alarms(new ArrayList<Alarm>(), "dummy object");
+        dummyAlarms = new Alarms(new ArrayList<Alarm>());
         createAlarmLog();
     }
 
@@ -56,5 +56,16 @@ public class RepoManager {
             e.printStackTrace();
         }
         return alarms;
+    }
+
+    public void saveAlarm(Alarm a){
+        Alarms alarms = readAlarms();
+        alarms.getAlarms().add(a);
+        try(FileWriter writer = new FileWriter(mFile)){
+            mGson.toJson(alarms,writer);
+            Log.d(TAG, mGson.toJson(alarms));
+        } catch(IOException ioe){
+            ioe.printStackTrace();
+        }
     }
 }
