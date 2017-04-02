@@ -95,8 +95,7 @@
                     android:textAppearance="?android:attr/textAppearanceSmall"
                     android:textColor="@android:color/primary_text_dark"
                     android:paddingTop="4dp"
-                    tools:text="Beep-Beep-Beep Alarm"
-                    android:visibility="gone"/>
+                    tools:text="Beep-Beep-Beep Alarm"/>
             </LinearLayout>
         </LinearLayout>
 

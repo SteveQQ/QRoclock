@@ -6,7 +6,6 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.FragmentTransaction;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.media.Ringtone;
@@ -16,19 +15,23 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.j256.ormlite.dao.ForeignCollection;
 import com.steveq.qroclock.R;
+import com.steveq.qroclock.database.AlarmsManager;
 import com.steveq.qroclock.repo.Alarm;
+import com.steveq.qroclock.repo.Day;
 import com.steveq.qroclock.repo.Days;
-import com.steveq.qroclock.repo.RepoManager;
 import com.steveq.qroclock.ui.activities.DataCollector;
 import com.steveq.qroclock.ui.activities.MainActivity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -39,7 +42,6 @@ public class AlarmConfigDialog extends DialogFragment {
     private static String TAG = AlarmConfigDialog.class.getSimpleName();
     private static String DELETABLE = "DELETABLE";
     private DataCollector mDataCollector;
-    private RepoManager mRepoManager;
     private MainActivity mParent;
 
     public static final Integer GET_RINGTONE = 10;
@@ -58,6 +60,9 @@ public class AlarmConfigDialog extends DialogFragment {
 
     @BindView(R.id.deleteAlarmImageButton)
     ImageButton deleteAlarmImageButton;
+
+    @BindView(R.id.daysRepeatingTextView)
+    TextView daysRepeatingTextView;
 
     public AlarmConfigDialog() {
         //empty constructor required for DialogFragment
@@ -79,7 +84,6 @@ public class AlarmConfigDialog extends DialogFragment {
         mParent = (MainActivity) getActivity();
         mDataCollector = mParent;
         mDataCollector.init();
-        mRepoManager = new RepoManager(mParent);
     }
 
     @Override
@@ -90,16 +94,48 @@ public class AlarmConfigDialog extends DialogFragment {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(mParent)
                 .setView(v)
-                .setPositiveButton(R.string.agree, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Alarm a = mDataCollector.getInstance();
-                        mRepoManager.saveAlarm(a);
-                        mParent.formConfirmed();
-                    }
-                })
+                .setPositiveButton(R.string.agree, null)
                 .setNegativeButton(R.string.disagree, null);
 
+        final AlertDialog alertDialog = builder.create();
+
+        alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialog) {
+                Button positioveButton = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+                positioveButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Alarm a = mDataCollector.getInstance();
+                        if(a.getTime() != null && !a.getTime().equals("")){
+                            //mRepoManager.saveAlarm(a);
+                            Integer id = AlarmsManager.getInstance(getActivity()).createAlarm(a);
+                            if(mDataCollector.getInstance().getTempDays().size() > 0) {
+                                Alarm alarmResult = AlarmsManager.getInstance(getActivity()).readAlarmById(id);
+                                ForeignCollection<Day> days = alarmResult.getDays();
+                                for(Day d : mDataCollector.getInstance().getTempDays()){
+                                    days.add(d);
+                                }
+                                AlarmsManager.getInstance(getActivity()).updateAlarm(alarmResult);
+                            }
+                            mParent.formConfirmed();
+                            alertDialog.dismiss();
+                        } else {
+                            Toast.makeText(mParent, "You should provide alarm time first...", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+
+                Button negativeButton = alertDialog.getButton(DialogInterface.BUTTON_NEGATIVE);
+
+                negativeButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        alertDialog.dismiss();
+                    }
+                });
+            }
+        });
 
         Boolean isDeletable = getArguments().getBoolean(DELETABLE);
         if(isDeletable){
@@ -107,8 +143,9 @@ public class AlarmConfigDialog extends DialogFragment {
         } else {
             deleteAlarmImageButton.setVisibility(View.GONE);
         }
+        updateRingtone();
 
-        return builder.create();
+        return alertDialog;
     }
 
     @Override
@@ -133,6 +170,9 @@ public class AlarmConfigDialog extends DialogFragment {
             FragmentTransaction ft = getChildFragmentManager().beginTransaction();
             ft.addToBackStack(null);
             DaysRepeatingDialog.newInstance().show(ft, null);
+        } else {
+            mDataCollector.getInstance().setTempDays(new ArrayList<Day>());
+            daysRepeatingTextView.setText("");
         }
     }
 
@@ -141,7 +181,7 @@ public class AlarmConfigDialog extends DialogFragment {
         Intent intent = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
         intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Select ringtone for the alarm");
         intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false);
-        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, false);
+        intent.putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true);
         intent.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALARM);
         startActivityForResult(intent, GET_RINGTONE);
     }
@@ -155,16 +195,22 @@ public class AlarmConfigDialog extends DialogFragment {
 
         if(resultCode == Activity.RESULT_OK){
             if(requestCode == AlarmConfigDialog.GET_RINGTONE) {
-                TextView chosenRingtone = (TextView) selectRingtoneField.findViewById(R.id.chosenRingtoneTextView);
-
                 Uri uri = data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
-                Ringtone ringtone = RingtoneManager.getRingtone(mParent, uri);
-
                 mDataCollector.withRingtone(uri.toString());
-                chosenRingtone.setText(ringtone.getTitle(mParent));
-                chosenRingtone.setVisibility(View.VISIBLE);
+
+                updateRingtone();
+
+                Log.d(TAG, uri.toString());
             }
         }
+    }
+
+    public void updateRingtone(){
+        TextView chosenRingtone = (TextView) selectRingtoneField.findViewById(R.id.chosenRingtoneTextView);
+        Uri uri = Uri.parse(mDataCollector.getInstance().getRingtoneUri());
+
+        Ringtone ringtone = RingtoneManager.getRingtone(mParent, uri);
+        chosenRingtone.setText(ringtone.getTitle(mParent));
     }
 
     public void updateTime(){
@@ -173,18 +219,17 @@ public class AlarmConfigDialog extends DialogFragment {
     }
 
     public void updateDaysRep(){
-        TextView reps = (TextView) bodyField.findViewById(R.id.daysRepeatingTextView);
-        List<Days> days = mDataCollector.getInstance().getDays();
+        //TextView reps = (TextView) bodyField.findViewById(R.id.daysRepeatingTextView);
+        List<Day> days = mDataCollector.getInstance().getTempDays();
         if(days.size() > 0) {
             StringBuilder builder = new StringBuilder();
-            for (Days d : days) {
-                builder.append(d.getAbb());
+            for (Day d : days) {
+                builder.append(Days.valueOf(d.getDayName()).getAbb());
                 builder.append(",");
-                Log.d(TAG, d.getAbb());
             }
             builder.deleteCharAt(builder.length() - 1);
-            reps.setText(builder.toString());
-            reps.setVisibility(View.VISIBLE);
+            daysRepeatingTextView.setText(builder.toString());
+            daysRepeatingTextView.setVisibility(View.VISIBLE);
         }
     }
 

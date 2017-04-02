@@ -1,25 +1,52 @@
 package com.steveq.qroclock.repo;
 
 
+import com.j256.ormlite.dao.ForeignCollection;
+import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.field.ForeignCollectionField;
+import com.j256.ormlite.table.DatabaseTable;
+
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
+@DatabaseTable(tableName = "alarms")
 public class Alarm implements Serializable{
+    @DatabaseField(generatedId = true)
+    private Integer id;
+
+    @DatabaseField
     private String time;
+
+    @DatabaseField(defaultValue = "True")
     private Boolean active;
-    private List<Days> days;
+
+    @ForeignCollectionField(eager = true)
+    private ForeignCollection<Day> days;
+
+    @DatabaseField
     private String ringtoneUri;
 
+    private List<Day> tempDays = new ArrayList<>();
+
     public Alarm() {
-        this.setActive(true);
+        setRingtoneUri("content://media/internal/audio/media/10");
     }
 
-    public String getRingtoneUri() {
-        return ringtoneUri;
+    public List<Day> getTempDays() {
+        return tempDays;
     }
 
-    public void setRingtoneUri(String ringtoneUri) {
-        this.ringtoneUri = ringtoneUri;
+    public void setTempDays(List<Day> tempDays) {
+        this.tempDays = tempDays;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getTime() {
@@ -38,20 +65,19 @@ public class Alarm implements Serializable{
         this.active = active;
     }
 
-    public List<Days> getDays() {
+    public ForeignCollection<Day> getDays() {
         return days;
     }
 
-    public void setDays(List<Days> days) {
+    public void setDays(ForeignCollection<Day> days) {
         this.days = days;
     }
 
-    @Override
-    public String toString() {
-        return "Alarm{" +
-                "time='" + time + '\'' +
-                ", active=" + active +
-                ", days=" + days +
-                '}';
+    public String getRingtoneUri() {
+        return ringtoneUri;
+    }
+
+    public void setRingtoneUri(String ringtoneUri) {
+        this.ringtoneUri = ringtoneUri;
     }
 }

@@ -6,27 +6,23 @@ import android.content.Intent;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
+import com.j256.ormlite.dao.ForeignCollection;
 import com.steveq.qroclock.R;
 import com.steveq.qroclock.adapters.AlarmsRecyclerViewAdapter;
+import com.steveq.qroclock.database.AlarmsManager;
 import com.steveq.qroclock.repo.Alarm;
-import com.steveq.qroclock.repo.Alarms;
-import com.steveq.qroclock.repo.Days;
-import com.steveq.qroclock.repo.RepoManager;
+import com.steveq.qroclock.repo.Day;
 import com.steveq.qroclock.ui.dialogs.AlarmConfigDialog;
 
 import java.util.List;
@@ -34,7 +30,6 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import butterknife.Optional;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class MainActivity extends AppCompatActivity implements DataCollector{
@@ -54,10 +49,6 @@ public class MainActivity extends AppCompatActivity implements DataCollector{
     @BindView(R.id.toolbar)
     Toolbar toolbar;
 
-    RepoManager mManager;
-
-
-
     //-------LIFECYCLE METHODS START--------//
 
     @Override
@@ -69,13 +60,13 @@ public class MainActivity extends AppCompatActivity implements DataCollector{
 
         setSupportActionBar(toolbar);
 
-        mManager = new RepoManager(this);
-        mAdapter = new AlarmsRecyclerViewAdapter(this, mManager);
+        mAdapter = new AlarmsRecyclerViewAdapter(this);
 
         alarmsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         alarmsRecyclerView.setAdapter(mAdapter);
 
         adjustRecyclerViewSpace();
+        AlarmsManager.getInstance(this);
     }
 
     //-------LIFECYCLE METHODS END--------//
@@ -140,11 +131,12 @@ public class MainActivity extends AppCompatActivity implements DataCollector{
     }
 
     private void adjustRecyclerViewSpace() {
-        Alarms curAlarms = mManager.readAlarms();
-        if(curAlarms.getAlarms().size() == 0){
+        //Alarms curAlarms = mManager.readAlarms();
+        List<Alarm> curAlarms = AlarmsManager.getInstance(this).readAlarms();
+        if(curAlarms.size() == 0){
             alarmsRecyclerView.setVisibility(View.GONE);
             emptyLinearLayout.setVisibility(View.VISIBLE);
-        } else if(curAlarms.getAlarms().size() > 0){
+        } else if(curAlarms.size() > 0){
             alarmsRecyclerView.setVisibility(View.VISIBLE);
             emptyLinearLayout.setVisibility(View.GONE);
         }
@@ -162,7 +154,7 @@ public class MainActivity extends AppCompatActivity implements DataCollector{
     }
 
     @Override
-    public void withRepetition(List<Days> days) {
+    public void withRepetition(ForeignCollection<Day> days) {
         mAlarm.setDays(days);
     }
 

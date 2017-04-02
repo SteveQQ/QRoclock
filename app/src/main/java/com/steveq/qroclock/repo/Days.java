@@ -1,5 +1,6 @@
 package com.steveq.qroclock.repo;
 
+import com.j256.ormlite.table.DatabaseTable;
 
 public enum Days {
     MONDAY(1, "mon."),

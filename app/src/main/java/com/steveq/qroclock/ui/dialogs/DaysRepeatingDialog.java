@@ -12,7 +12,11 @@ import android.view.View;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
 
+import com.j256.ormlite.dao.ForeignCollection;
 import com.steveq.qroclock.R;
+import com.steveq.qroclock.database.AlarmsManager;
+import com.steveq.qroclock.repo.Alarm;
+import com.steveq.qroclock.repo.Day;
 import com.steveq.qroclock.repo.Days;
 import com.steveq.qroclock.ui.activities.DataCollector;
 
@@ -153,8 +157,17 @@ public class DaysRepeatingDialog extends DialogFragment {
     @Override
     public void onDismiss(DialogInterface dialog) {
         super.onDismiss(dialog);
-        List<Days> days = new ArrayList<>(Arrays.asList(checklist.toArray(new Days[]{})));
-        mDataCollector.withRepetition(days);
+
+//        Integer id = AlarmsManager.getInstance(getActivity()).createAlarm(mDataCollector.getInstance());
+//        Alarm alarmResult = AlarmsManager.getInstance(getActivity()).readAlarmById(id);
+//        ForeignCollection<Day> days = alarmResult.getDays();
+
+        List<Day> ds = new ArrayList<>();
+        for(Days d : checklist){
+            ds.add(new Day(d.toString()));
+        }
+        mDataCollector.getInstance().setTempDays(ds);
+        //mDataCollector.withRepetition(days);
         mParentDialog.updateDaysRep();
     }
 }
