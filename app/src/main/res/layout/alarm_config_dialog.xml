@@ -122,17 +122,29 @@
             android:scrollHorizontally="false"
             android:maxLines="100"
             android:visibility="gone"/>
-        <ImageButton
-            android:id="@+id/deleteAlarmImageButton"
+        <LinearLayout
+            android:id="@+id/deleteAlarmField"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:srcCompat="@drawable/ic_bin_vec"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="16dp"
-            android:paddingStart="2dp"
-            android:paddingEnd="4dp"
-            android:background="@android:color/transparent"/>
+            android:orientation="horizontal">
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:srcCompat="@drawable/ic_bin_vec"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="16dp"
+                android:paddingStart="2dp"
+                android:paddingEnd="4dp"
+                android:background="@android:color/transparent"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/delete"
+                android:textColor="@android:color/primary_text_dark"/>
+        </LinearLayout>
     </LinearLayout>
 
 </LinearLayout>

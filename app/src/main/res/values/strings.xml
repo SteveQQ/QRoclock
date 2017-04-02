@@ -17,6 +17,7 @@
     <string name="repeat">Repeat in...</string>
     <string name="ringtone">Ringtone</string>
     <string name="repeating">Repeating</string>
+    <string name="delete">Delete</string>
     <string-array name="days">
         <item>Monday</item>
         <item>Tuesday</item>

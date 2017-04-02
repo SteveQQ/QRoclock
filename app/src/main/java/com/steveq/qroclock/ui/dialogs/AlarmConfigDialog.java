@@ -58,8 +58,8 @@ public class AlarmConfigDialog extends DialogFragment {
     @BindView(R.id.selectRingtoneField)
     LinearLayout selectRingtoneField;
 
-    @BindView(R.id.deleteAlarmImageButton)
-    ImageButton deleteAlarmImageButton;
+    @BindView(R.id.deleteAlarmField)
+    LinearLayout deleteAlarmImageButton;
 
     @BindView(R.id.daysRepeatingTextView)
     TextView daysRepeatingTextView;

@@ -64,12 +64,12 @@ public class AlarmsRecyclerViewAdapter extends RecyclerView.Adapter<AlarmsRecycl
         holder.alarmActiveSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked){
-                    mAlarms.get(pos).setActive(true);
-                } else {
-                    mAlarms.get(pos).setActive(false);
-                }
-
+            if(isChecked){
+                mAlarms.get(pos).setActive(true);
+            } else {
+                mAlarms.get(pos).setActive(false);
+            }
+            AlarmsManager.getInstance(mActivity).updateAlarm(mAlarms.get(pos));
             }
         });
 
