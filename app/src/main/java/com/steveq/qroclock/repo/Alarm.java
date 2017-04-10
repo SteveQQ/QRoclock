@@ -1,6 +1,9 @@
 package com.steveq.qroclock.repo;
 
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.j256.ormlite.dao.ForeignCollection;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.field.ForeignCollectionField;
@@ -11,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @DatabaseTable(tableName = "alarms")
-public class Alarm implements Serializable{
+public class Alarm implements Parcelable{
     @DatabaseField(generatedId = true)
     private Integer id;
 
@@ -27,11 +30,14 @@ public class Alarm implements Serializable{
     @DatabaseField
     private String ringtoneUri;
 
+    //List to keep selected days before saving them in ForeignCollection by clicking positive dialog button
     private List<Day> tempDays = new ArrayList<>();
 
     public Alarm() {
         setRingtoneUri("content://media/internal/audio/media/10");
     }
+
+
 
     public List<Day> getTempDays() {
         return tempDays;
@@ -79,5 +85,27 @@ public class Alarm implements Serializable{
 
     public void setRingtoneUri(String ringtoneUri) {
         this.ringtoneUri = ringtoneUri;
+    }
+
+    @Override
+    public String toString() {
+        return "Alarm{" +
+                "id=" + id +
+                ", time='" + time + '\'' +
+                ", active=" + active +
+                ", days=" + days +
+                ", ringtoneUri='" + ringtoneUri + '\'' +
+                ", tempDays=" + tempDays +
+                '}';
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+
     }
 }

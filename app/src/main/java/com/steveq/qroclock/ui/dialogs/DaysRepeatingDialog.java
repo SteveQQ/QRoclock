@@ -75,8 +75,6 @@ public class DaysRepeatingDialog extends DialogFragment {
         mParentDialog = (AlarmConfigDialog) getParentFragment();
     }
 
-
-
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         LayoutInflater inflater = LayoutInflater.from(getActivity());
@@ -158,16 +156,12 @@ public class DaysRepeatingDialog extends DialogFragment {
     public void onDismiss(DialogInterface dialog) {
         super.onDismiss(dialog);
 
-//        Integer id = AlarmsManager.getInstance(getActivity()).createAlarm(mDataCollector.getInstance());
-//        Alarm alarmResult = AlarmsManager.getInstance(getActivity()).readAlarmById(id);
-//        ForeignCollection<Day> days = alarmResult.getDays();
-
         List<Day> ds = new ArrayList<>();
         for(Days d : checklist){
             ds.add(new Day(d.toString()));
         }
+
         mDataCollector.getInstance().setTempDays(ds);
-        //mDataCollector.withRepetition(days);
         mParentDialog.updateDaysRep();
     }
 }

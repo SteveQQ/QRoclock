@@ -41,10 +41,15 @@ import butterknife.OnClick;
 public class AlarmConfigDialog extends DialogFragment {
     private static String TAG = AlarmConfigDialog.class.getSimpleName();
     private static String DELETABLE = "DELETABLE";
+    private static String SELECTED = "SELECTED";
     private DataCollector mDataCollector;
     private MainActivity mParent;
+    private Boolean isDeletable;
+    private Alarm currentSelected;
 
     public static final Integer GET_RINGTONE = 10;
+
+    //-------DECLARE VIEW HANDLES START--------//
 
     @BindView(R.id.bodyField)
     LinearLayout bodyField;
@@ -64,14 +69,26 @@ public class AlarmConfigDialog extends DialogFragment {
     @BindView(R.id.daysRepeatingTextView)
     TextView daysRepeatingTextView;
 
+    @BindView(R.id.timeInputTextView)
+    TextView timeText;
+
+    @BindView(R.id.chosenRingtoneTextView)
+    TextView chosenRingtone;
+
+    //-------DECLARE VIEW HANDLES END--------//
+
     public AlarmConfigDialog() {
         //empty constructor required for DialogFragment
     }
 
-    public static AlarmConfigDialog newInstance(Boolean isDeletable){
+    //Up to isDeletable, extra icon to delete alarm is shown
+    //If user enters AlarmConfigDialog by clicking row in RecyclerView It's shown
+    //If user enters AlarmConfigDialog by clicking "+" fab It's not shown
+    public static AlarmConfigDialog newInstance(Boolean isDeletable, Integer selectedId){
         AlarmConfigDialog frag = new AlarmConfigDialog();
         Bundle args = new Bundle();
         args.putBoolean(DELETABLE, isDeletable);
+        args.putInt(SELECTED, selectedId);
         frag.setArguments(args);
         return frag;
     }
@@ -84,8 +101,18 @@ public class AlarmConfigDialog extends DialogFragment {
         mParent = (MainActivity) getActivity();
         mDataCollector = mParent;
         mDataCollector.init();
+        isDeletable = getArguments().getBoolean(DELETABLE);
+        if(isDeletable){
+            Integer curId = getArguments().getInt(SELECTED);
+            if(curId >= 0) {
+                currentSelected = AlarmsManager.getInstance(mParent).readAlarmById(curId);
+            } else {
+                throw new IllegalArgumentException("Pass valid Id");
+            }
+        }
     }
 
+    //Forming the dialog
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         LayoutInflater inflater = LayoutInflater.from(mParent);
@@ -108,15 +135,15 @@ public class AlarmConfigDialog extends DialogFragment {
                     public void onClick(View v) {
                         Alarm a = mDataCollector.getInstance();
                         if(a.getTime() != null && !a.getTime().equals("")){
-                            //mRepoManager.saveAlarm(a);
                             Integer id = AlarmsManager.getInstance(getActivity()).createAlarm(a);
                             if(mDataCollector.getInstance().getTempDays().size() > 0) {
-                                Alarm alarmResult = AlarmsManager.getInstance(getActivity()).readAlarmById(id);
-                                ForeignCollection<Day> days = alarmResult.getDays();
+                                Alarm alarmFinal = AlarmsManager.getInstance(getActivity()).readAlarmById(id);
+                                //ForeignCollection need to be retrieved from inserted record
+                                ForeignCollection<Day> days = alarmFinal.getDays();
                                 for(Day d : mDataCollector.getInstance().getTempDays()){
                                     days.add(d);
                                 }
-                                AlarmsManager.getInstance(getActivity()).updateAlarm(alarmResult);
+                                //AlarmsManager.getInstance(getActivity()).updateAlarm(alarmFinal);
                             }
                             mParent.formConfirmed();
                             alertDialog.dismiss();
@@ -137,7 +164,6 @@ public class AlarmConfigDialog extends DialogFragment {
             }
         });
 
-        Boolean isDeletable = getArguments().getBoolean(DELETABLE);
         if(isDeletable){
             deleteAlarmImageButton.setVisibility(View.VISIBLE);
         } else {
@@ -151,6 +177,10 @@ public class AlarmConfigDialog extends DialogFragment {
     @Override
     public void onDismiss(DialogInterface dialog) {
         super.onDismiss(dialog);
+        isDeletable = false;
+        currentSelected = null;
+        mParent = null;
+        mDataCollector = null;
     }
 
     //-------LIFECYCLE METHODS END--------//
@@ -186,6 +216,13 @@ public class AlarmConfigDialog extends DialogFragment {
         startActivityForResult(intent, GET_RINGTONE);
     }
 
+    @OnClick(R.id.deleteAlarmField)
+    public void deleteAlarm(View v){
+        AlarmsManager.getInstance(mParent).deleteAlarm(currentSelected);
+        getDialog().dismiss();
+        mParent.formConfirmed();
+    }
+
     //-------HANDLERS METHODS END---------//
 
 
@@ -205,32 +242,36 @@ public class AlarmConfigDialog extends DialogFragment {
         }
     }
 
+    public void updateTime(){
+        timeText.setText(mDataCollector.getInstance().getTime());
+    }
+
     public void updateRingtone(){
-        TextView chosenRingtone = (TextView) selectRingtoneField.findViewById(R.id.chosenRingtoneTextView);
         Uri uri = Uri.parse(mDataCollector.getInstance().getRingtoneUri());
 
         Ringtone ringtone = RingtoneManager.getRingtone(mParent, uri);
         chosenRingtone.setText(ringtone.getTitle(mParent));
     }
 
-    public void updateTime(){
-        TextView timeText = (TextView) timeInputField.findViewById(R.id.timeInputTextView);
-        timeText.setText(mDataCollector.getInstance().getTime());
-    }
-
     public void updateDaysRep(){
         //TextView reps = (TextView) bodyField.findViewById(R.id.daysRepeatingTextView);
         List<Day> days = mDataCollector.getInstance().getTempDays();
         if(days.size() > 0) {
-            StringBuilder builder = new StringBuilder();
-            for (Day d : days) {
-                builder.append(Days.valueOf(d.getDayName()).getAbb());
-                builder.append(",");
-            }
-            builder.deleteCharAt(builder.length() - 1);
-            daysRepeatingTextView.setText(builder.toString());
+            daysRepeatingTextView.setText(getDaysAbbrsString(days));
             daysRepeatingTextView.setVisibility(View.VISIBLE);
+        } else {
+            repeatingCheckbox.setChecked(false);
         }
+    }
+
+    public static String getDaysAbbrsString(List<Day> days){
+        StringBuilder builder = new StringBuilder();
+        for (Day d : days) {
+            builder.append(Days.valueOf(d.getDayName()).getAbb());
+            builder.append(",");
+        }
+        builder.deleteCharAt(builder.length() - 1);
+        return builder.toString();
     }
 
 }

@@ -37,6 +37,8 @@ public class MainActivity extends AppCompatActivity implements DataCollector{
     private Alarm mAlarm;
     private AlarmsRecyclerViewAdapter mAdapter;
 
+    //-------DECLARE VIEW HANDLES START--------//
+
     @BindView(R.id.alarmsRecyclerView)
     RecyclerView alarmsRecyclerView;
 
@@ -48,6 +50,8 @@ public class MainActivity extends AppCompatActivity implements DataCollector{
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
+
+    //-------DECLARE VIEW HANDLES END--------//
 
     //-------LIFECYCLE METHODS START--------//
 
@@ -65,7 +69,7 @@ public class MainActivity extends AppCompatActivity implements DataCollector{
         alarmsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         alarmsRecyclerView.setAdapter(mAdapter);
 
-        adjustRecyclerViewSpace();
+        prepareRecyclerViewSpace();
         AlarmsManager.getInstance(this);
     }
 
@@ -108,7 +112,7 @@ public class MainActivity extends AppCompatActivity implements DataCollector{
     public void fabClick(View v){
         FragmentTransaction ft = getFragmentManager().beginTransaction();
         ft.addToBackStack(null);
-        AlarmConfigDialog.newInstance(false).show(ft, null);
+        AlarmConfigDialog.newInstance(false, -1).show(ft, null);
     }
 
     @Override
@@ -126,12 +130,11 @@ public class MainActivity extends AppCompatActivity implements DataCollector{
     //-------HANDLERS METHODS END----//
 
     public void formConfirmed(){
-        adjustRecyclerViewSpace();
+        prepareRecyclerViewSpace();
         mAdapter.update();
     }
 
-    private void adjustRecyclerViewSpace() {
-        //Alarms curAlarms = mManager.readAlarms();
+    private void prepareRecyclerViewSpace() {
         List<Alarm> curAlarms = AlarmsManager.getInstance(this).readAlarms();
         if(curAlarms.size() == 0){
             alarmsRecyclerView.setVisibility(View.GONE);

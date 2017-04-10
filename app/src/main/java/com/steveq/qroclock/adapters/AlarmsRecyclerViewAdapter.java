@@ -11,6 +11,7 @@ import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import com.j256.ormlite.dao.ForeignCollection;
 import com.steveq.qroclock.R;
 import com.steveq.qroclock.database.AlarmsManager;
 import com.steveq.qroclock.repo.Alarm;
@@ -18,18 +19,18 @@ import com.steveq.qroclock.repo.Day;
 import com.steveq.qroclock.repo.Days;
 import com.steveq.qroclock.ui.dialogs.AlarmConfigDialog;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class AlarmsRecyclerViewAdapter extends RecyclerView.Adapter<AlarmsRecyclerViewAdapter.AlarmsViewHolder> {
     private static final String TAG = AlarmConfigDialog.class.getSimpleName();
-    //private RepoManager mRepoManager;
+
     private List<Alarm> mAlarms;
     private Activity mActivity;
 
     public AlarmsRecyclerViewAdapter(Activity activity) {
         mActivity = activity;
-        //mRepoManager = repoManager;
-        mAlarms = AlarmsManager.getInstance(mActivity).readAlarms();
+        update();
     }
 
     public void update(){
@@ -49,27 +50,32 @@ public class AlarmsRecyclerViewAdapter extends RecyclerView.Adapter<AlarmsRecycl
         final int pos = position;
         holder.alarmTimeTextView.setText(mAlarms.get(position).getTime());
         holder.alarmActiveSwitch.setChecked(mAlarms.get(position).getActive());
-        if(mAlarms.get(position).getDays() != null && mAlarms.get(position).getDays().size()>0){
-            StringBuilder builder = new StringBuilder();
-            for (Day d : mAlarms.get(position).getDays()) {
-                builder.append(Days.valueOf(d.getDayName()).getAbb());
-                builder.append(",");
-            }
-            builder.deleteCharAt(builder.length() - 1);
-            holder.daysRepsTextView.setText(builder.toString());
+        final Alarm alarm = mAlarms.get(position);
+
+        if(mAlarms.get(position).getDays() != null && alarm.getDays().size()>0){
+            holder.daysRepsTextView.setText(AlarmConfigDialog.getDaysAbbrsString(new ArrayList<>(alarm.getDays())));
         } else {
-            holder.daysRepsTextView.setText("Tomorrow");
+            holder.daysRepsTextView.setText(R.string.tomorrow);
         }
 
         holder.alarmActiveSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
             if(isChecked){
-                mAlarms.get(pos).setActive(true);
+                alarm.setActive(true);
             } else {
-                mAlarms.get(pos).setActive(false);
+                alarm.setActive(false);
             }
-            AlarmsManager.getInstance(mActivity).updateAlarm(mAlarms.get(pos));
+            AlarmsManager.getInstance(mActivity).updateAlarmActiveStatus(mAlarms.get(pos));
+            }
+        });
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragmentTransaction ft = mActivity.getFragmentManager().beginTransaction();
+                ft.addToBackStack(null);
+                AlarmConfigDialog.newInstance(true, mAlarms.get(pos).getId()).show(ft, null);
             }
         });
 
@@ -80,7 +86,7 @@ public class AlarmsRecyclerViewAdapter extends RecyclerView.Adapter<AlarmsRecycl
         return mAlarms.size();
     }
 
-    class AlarmsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    class AlarmsViewHolder extends RecyclerView.ViewHolder{
         TextView alarmTimeTextView;
         Switch alarmActiveSwitch;
         TextView daysRepsTextView;
@@ -90,14 +96,8 @@ public class AlarmsRecyclerViewAdapter extends RecyclerView.Adapter<AlarmsRecycl
             alarmTimeTextView = (TextView) itemView.findViewById(R.id.alarmTimeTextView);
             alarmActiveSwitch = (Switch) itemView.findViewById(R.id.alarmActiveSwitch);
             daysRepsTextView = (TextView) itemView.findViewById(R.id.daysRepsTextView);
-            itemView.setOnClickListener(this);
-        }
-
-        @Override
-        public void onClick(View v) {
-            FragmentTransaction ft = mActivity.getFragmentManager().beginTransaction();
-            ft.addToBackStack(null);
-            AlarmConfigDialog.newInstance(true).show(ft, null);
         }
     }
+
+
 }

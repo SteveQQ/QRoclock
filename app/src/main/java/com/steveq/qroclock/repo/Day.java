@@ -42,4 +42,13 @@ public class Day {
     public void setAlarm(Alarm alarm) {
         this.alarm = alarm;
     }
+
+    @Override
+    public String toString() {
+        return "Day{" +
+                "id=" + id +
+                ", dayName='" + dayName + '\'' +
+                ", alarm=" + alarm +
+                '}';
+    }
 }

@@ -3,6 +3,7 @@ package com.steveq.qroclock.database;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 import com.j256.ormlite.dao.Dao;
@@ -14,6 +15,7 @@ import com.steveq.qroclock.repo.Day;
 import java.sql.SQLException;
 
 public class AlarmSqliteHelper extends OrmLiteSqliteOpenHelper{
+    private static final String TAG = AlarmSqliteHelper.class.getSimpleName();
     private static final String DB_NAME = "alarms";
     private static final int DB_VERSION = 1;
 
@@ -33,6 +35,7 @@ public class AlarmSqliteHelper extends OrmLiteSqliteOpenHelper{
     @Override
     public void onCreate(SQLiteDatabase database, ConnectionSource connectionSource) {
         try{
+            Log.d(TAG, "Creating Tables");
             TableUtils.createTable(connectionSource, Alarm.class);
             TableUtils.createTable(connectionSource, Day.class);
         } catch (SQLException sqle){
