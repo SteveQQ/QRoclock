@@ -17,10 +17,11 @@ public class AlarmRunnable implements Runnable {
     private String mTimeForAlarm;
     private Service mParent;
     private RunnableCallback mCallback;
+    private AlarmHandlingService.AlarmInfo mAlarmInfo;
     private static int tick;
 
-    public AlarmRunnable(String time, RunnableCallback callback){
-        mTimeForAlarm = time;
+    public AlarmRunnable(AlarmHandlingService.AlarmInfo info, RunnableCallback callback){
+        mAlarmInfo = info;
         mCallback = callback;
     }
 
@@ -31,9 +32,9 @@ public class AlarmRunnable implements Runnable {
         String curTime = sdf.format(calendar.getTime());
         System.out.println("Current time : " + curTime);
         System.out.println("Set time : " + mTimeForAlarm);
-        if(curTime.equals(mTimeForAlarm)){
+        if(curTime.equals(mAlarmInfo.getTime())){
             Log.d(TAG, "remove this runnable instance from set");
-            mCallback.timeHasCome(this);
+            mCallback.timeHasCome(this, mAlarmInfo);
         }
     }
 }

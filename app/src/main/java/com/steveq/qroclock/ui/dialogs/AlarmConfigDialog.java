@@ -148,6 +148,7 @@ public class AlarmConfigDialog extends DialogFragment {
 
                             Intent intent = new Intent(mParent, AlarmHandlingService.class);
                             intent.putExtra(AlarmHandlingService.ALARM_TIME, a.getTime());
+                            intent.putExtra(AlarmHandlingService.ALARM_RINGTONE, a.getRingtoneUri());
                             mParent.startService(intent);
                             mParent.formConfirmed();
                             alertDialog.dismiss();

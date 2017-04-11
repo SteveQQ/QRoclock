@@ -5,5 +5,5 @@ package com.steveq.qroclock.service;
  */
 
 public interface RunnableCallback {
-    void timeHasCome(Runnable r);
+    void timeHasCome(Runnable r, AlarmHandlingService.AlarmInfo info);
 }
