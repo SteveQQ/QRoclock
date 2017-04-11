@@ -21,7 +21,7 @@
         </activity>
 
         <service
-            android:name=".service.TimeTrackerService"
+            android:name=".service.AlarmHandlingService"
             android:enabled="true"
             android:exported="false"/>
     </application>
