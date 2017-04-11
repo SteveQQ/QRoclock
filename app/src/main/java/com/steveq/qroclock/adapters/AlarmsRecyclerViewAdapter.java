@@ -79,6 +79,7 @@ public class AlarmsRecyclerViewAdapter extends RecyclerView.Adapter<AlarmsRecycl
             }
         });
 
+
     }
 
     @Override

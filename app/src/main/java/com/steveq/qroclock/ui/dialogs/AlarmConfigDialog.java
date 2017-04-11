@@ -28,6 +28,7 @@ import com.steveq.qroclock.database.AlarmsManager;
 import com.steveq.qroclock.repo.Alarm;
 import com.steveq.qroclock.repo.Day;
 import com.steveq.qroclock.repo.Days;
+import com.steveq.qroclock.service.AlarmHandlingService;
 import com.steveq.qroclock.ui.activities.DataCollector;
 import com.steveq.qroclock.ui.activities.MainActivity;
 
@@ -115,7 +116,7 @@ public class AlarmConfigDialog extends DialogFragment {
     //Forming the dialog
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        LayoutInflater inflater = LayoutInflater.from(mParent);
+        final LayoutInflater inflater = LayoutInflater.from(mParent);
         View v = inflater.inflate(R.layout.alarm_config_dialog, null);
         ButterKnife.bind(this, v);
 
@@ -143,8 +144,11 @@ public class AlarmConfigDialog extends DialogFragment {
                                 for(Day d : mDataCollector.getInstance().getTempDays()){
                                     days.add(d);
                                 }
-                                //AlarmsManager.getInstance(getActivity()).updateAlarm(alarmFinal);
                             }
+
+                            Intent intent = new Intent(mParent, AlarmHandlingService.class);
+                            intent.putExtra(AlarmHandlingService.ALARM_TIME, a.getTime());
+                            mParent.startService(intent);
                             mParent.formConfirmed();
                             alertDialog.dismiss();
                         } else {
