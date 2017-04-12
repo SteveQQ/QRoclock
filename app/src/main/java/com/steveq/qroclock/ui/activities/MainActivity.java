@@ -111,9 +111,11 @@ public class MainActivity extends AppCompatActivity implements DataCollector{
 
     @OnClick(R.id.fab)
     public void fabClick(View v){
-        FragmentTransaction ft = getFragmentManager().beginTransaction();
-        ft.addToBackStack(null);
-        AlarmConfigDialog.newInstance(false, -1).show(ft, null);
+//        FragmentTransaction ft = getFragmentManager().beginTransaction();
+//        ft.addToBackStack(null);
+//        AlarmConfigDialog.newInstance(false, -1).show(ft, null);
+        Intent intent = new Intent(this, AlarmRingActivity.class);
+        startActivity(intent);
     }
 
     @Override
