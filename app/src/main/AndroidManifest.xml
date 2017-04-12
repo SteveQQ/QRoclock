@@ -23,9 +23,13 @@
         <service
             android:name=".service.AlarmHandlingService"
             android:enabled="true"
-            android:exported="false" />
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="com.steveq.qroclock.ALARM_STOP"/>
+            </intent-filter>
+        </service>
 
-        <activity android:name=".ui.activities.AlarmRingActivity"></activity>
+        <activity android:name=".ui.activities.AlarmRingActivity"/>
     </application>
 
 </manifest>

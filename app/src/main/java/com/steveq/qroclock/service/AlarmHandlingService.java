@@ -6,13 +6,15 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.media.AudioManager;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
@@ -34,7 +36,11 @@ public class AlarmHandlingService extends Service implements RunnableCallback{
     public static int FOREGROUND_ID = 10;
     private Looper mServiceLooper;
     private ServiceHandler mServiceHandler;
-    private BroadcastReceiver mReceiver = null;
+    private BroadcastReceiver mTimeTickReceiver = null;
+    private BroadcastReceiver mAlarmStopReceiver = null;
+    private Ringtone mRingtone;
+    private Boolean isWaking;
+
     private static int numTicks = 0;
     private Set<Runnable> mTasksToExecute;
 
@@ -70,10 +76,28 @@ public class AlarmHandlingService extends Service implements RunnableCallback{
         Intent intent = new Intent(this, AlarmRingActivity.class);
         intent.putExtra(ALARM_RINGTONE, info.getRingtone());
         startActivity(intent);
-        if(mTasksToExecute.size() == 0){
-            Log.d(TAG, "Stopping the service...");
-            stopSelf();
-        }
+        Uri ringUri = Uri.parse(info.getRingtone());
+        mRingtone = RingtoneManager.getRingtone(this, ringUri);
+        isWaking = true;
+        wakeUp();
+    }
+
+    private void wakeUp(){
+        final AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+        HandlerThread thread = new HandlerThread("Ringtone play thread");
+        thread.start();
+        Handler handler = new Handler(thread.getLooper());
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+            while(isWaking){
+                if(!mRingtone.isPlaying()) {
+                    mRingtone.play();
+                    audioManager.setStreamVolume(AudioManager.STREAM_RING, audioManager.getStreamMaxVolume(AudioManager.STREAM_RING), 0);
+                }
+            }
+            }
+        });
     }
 
     private final class ServiceHandler extends Handler{
@@ -90,7 +114,8 @@ public class AlarmHandlingService extends Service implements RunnableCallback{
     @Override
     public void onCreate() {
         Log.d(TAG, "onCreate");
-        mReceiver = new BroadcastReceiver() {
+
+        mTimeTickReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();
@@ -105,7 +130,22 @@ public class AlarmHandlingService extends Service implements RunnableCallback{
         };
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_TIME_TICK);
-        registerReceiver(mReceiver, filter);
+        registerReceiver(mTimeTickReceiver, filter);
+
+        mAlarmStopReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if(mTasksToExecute.size() == 0){
+                    Log.d(TAG, "Stopping the service...");
+                    mRingtone.stop();
+                    isWaking = false;
+                    stopSelf();
+                }
+            }
+        };
+        filter = new IntentFilter();
+        filter.addAction("com.steveq.qroclock.ALARM_STOP");
+        registerReceiver(mAlarmStopReceiver, filter);
 
         HandlerThread thread = new HandlerThread("Time Tracking Thread", Thread.NORM_PRIORITY);
         thread.start();
@@ -132,9 +172,10 @@ public class AlarmHandlingService extends Service implements RunnableCallback{
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "onStartCommand");
 
-        AlarmInfo aInfo = new AlarmInfo(intent.getStringExtra(ALARM_TIME), intent.getStringExtra(ALARM_RINGTONE));
-        mTasksToExecute.add(new AlarmRunnable(aInfo, AlarmHandlingService.this));
-
+        if(!"com.steveq.qroclock.ALARM_STOP".equals(intent.getAction())) {
+            AlarmInfo aInfo = new AlarmInfo(intent.getStringExtra(ALARM_TIME), intent.getStringExtra(ALARM_RINGTONE));
+            mTasksToExecute.add(new AlarmRunnable(aInfo, AlarmHandlingService.this));
+        }
         return START_STICKY;
     }
 
@@ -142,7 +183,8 @@ public class AlarmHandlingService extends Service implements RunnableCallback{
     public void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "Unregister Receiver");
-        unregisterReceiver(mReceiver);
+        unregisterReceiver(mTimeTickReceiver);
+        unregisterReceiver(mAlarmStopReceiver);
     }
 
     @Nullable

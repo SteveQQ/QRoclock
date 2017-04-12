@@ -27,9 +27,6 @@ public class AlarmRingActivity extends AppCompatActivity {
     @BindView(R.id.stopAlarmButton)
     Button stopAlarmButton;
 
-    private Ringtone mRingtone;
-    private Boolean isWaking = true;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,37 +35,12 @@ public class AlarmRingActivity extends AppCompatActivity {
 
         Intent receivedIntent = getIntent();
 
-        Uri ringUri = Uri.parse(receivedIntent.getStringExtra(AlarmHandlingService.ALARM_RINGTONE));
-        mRingtone = RingtoneManager.getRingtone(this, ringUri);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        wakeUp();
-    }
-
-    private void wakeUp(){
-        final AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
-        HandlerThread thread = new HandlerThread("Ringtone play thread");
-        thread.start();
-        Handler handler = new Handler(thread.getLooper());
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                while(isWaking){
-                    if(!mRingtone.isPlaying()) {
-                        mRingtone.play();
-                        audioManager.setStreamVolume(AudioManager.STREAM_RING, audioManager.getStreamMaxVolume(AudioManager.STREAM_RING), 0);
-                    }
-                }
-            }
-        });
     }
 
     @OnClick(R.id.stopAlarmButton)
     public void stopAlarm(View v){
-        isWaking = false;
-        mRingtone.stop();
+        Intent intent = new Intent();
+        intent.setAction("com.steveq.qroclock.ALARM_STOP");
+        sendBroadcast(intent);
     }
 }
