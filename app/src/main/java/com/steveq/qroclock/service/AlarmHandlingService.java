@@ -1,6 +1,8 @@
 package com.steveq.qroclock.service;
 
 import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -19,6 +21,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import com.steveq.qroclock.R;
 import com.steveq.qroclock.ui.activities.AlarmRingActivity;
 
 import java.util.HashSet;
@@ -79,7 +82,22 @@ public class AlarmHandlingService extends Service implements RunnableCallback{
         Uri ringUri = Uri.parse(info.getRingtone());
         mRingtone = RingtoneManager.getRingtone(this, ringUri);
         isWaking = true;
+
+        updateNotification(info.getTime());
         wakeUp();
+    }
+
+    private void updateNotification(String time) {
+        NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        Intent intent = new Intent(this, AlarmRingActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        Notification not = new Notification.Builder(this)
+                .setContentTitle("It's QR O'clock !!!")
+                .setContentText("It's " + time + " - tap to have another chance to dismiss alarm")
+                .setContentIntent(pendingIntent)
+                .setSmallIcon(R.drawable.ic_alarm_vec)
+                .build();
+        manager.notify(FOREGROUND_ID, not);
     }
 
     private void wakeUp(){
@@ -87,6 +105,7 @@ public class AlarmHandlingService extends Service implements RunnableCallback{
         HandlerThread thread = new HandlerThread("Ringtone play thread");
         thread.start();
         Handler handler = new Handler(thread.getLooper());
+
         handler.post(new Runnable() {
             @Override
             public void run() {
@@ -95,6 +114,10 @@ public class AlarmHandlingService extends Service implements RunnableCallback{
                     mRingtone.play();
                     audioManager.setStreamVolume(AudioManager.STREAM_RING, audioManager.getStreamMaxVolume(AudioManager.STREAM_RING), 0);
                 }
+            }
+            if(mTasksToExecute.size() == 0){
+                Log.d(TAG, "Stopping the service...");
+                stopSelf();
             }
             }
         });
@@ -135,12 +158,7 @@ public class AlarmHandlingService extends Service implements RunnableCallback{
         mAlarmStopReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                if(mTasksToExecute.size() == 0){
-                    Log.d(TAG, "Stopping the service...");
-                    mRingtone.stop();
-                    isWaking = false;
-                    stopSelf();
-                }
+                isWaking = false;
             }
         };
         filter = new IntentFilter();
@@ -161,9 +179,9 @@ public class AlarmHandlingService extends Service implements RunnableCallback{
         NotificationCompat.Builder b=new NotificationCompat.Builder(this);
 
         b.setOngoing(true)
-                .setContentTitle("Alarm")
-                .setContentText("Alarm")
-                .setSmallIcon(android.R.drawable.stat_sys_download);
+                .setContentTitle("QR O'clock")
+                .setContentText("You have active alarms")
+                .setSmallIcon(R.drawable.ic_alarm_vec);
 
         return(b.build());
     }
