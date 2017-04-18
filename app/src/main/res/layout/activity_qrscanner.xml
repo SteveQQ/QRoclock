@@ -4,7 +4,7 @@
     android:id="@+id/activity_alarm_ring"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.steveq.qroclock.ui.activities.AlarmRingActivity">
+    tools:context="com.steveq.qroclock.ui.activities.QRScannerActivity">
 
     <com.journeyapps.barcodescanner.DecoratedBarcodeView
         android:id="@+id/barcodeView"
@@ -12,10 +12,10 @@
         android:layout_height="match_parent"/>
 
     <!--<Button-->
-        <!--android:id="@+id/stopAlarmButton"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_centerInParent="true"-->
-        <!--android:text="STOP"/>-->
+    <!--android:id="@+id/stopAlarmButton"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_centerInParent="true"-->
+    <!--android:text="STOP"/>-->
 
 </RelativeLayout>

@@ -23,6 +23,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.j256.ormlite.dao.ForeignCollection;
+import com.steveq.qroclock.QRoclockApplication;
 import com.steveq.qroclock.R;
 import com.steveq.qroclock.database.AlarmsManager;
 import com.steveq.qroclock.repo.Alarm;
@@ -31,6 +32,7 @@ import com.steveq.qroclock.repo.Days;
 import com.steveq.qroclock.service.AlarmHandlingService;
 import com.steveq.qroclock.ui.activities.DataCollector;
 import com.steveq.qroclock.ui.activities.MainActivity;
+import com.steveq.qroclock.ui.activities.QRScannerActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -136,22 +138,26 @@ public class AlarmConfigDialog extends DialogFragment {
                     public void onClick(View v) {
                         Alarm a = mDataCollector.getInstance();
                         if(a.getTime() != null && !a.getTime().equals("")){
-                            Integer id = AlarmsManager.getInstance(getActivity()).createAlarm(a);
-                            if(mDataCollector.getInstance().getTempDays().size() > 0) {
-                                Alarm alarmFinal = AlarmsManager.getInstance(getActivity()).readAlarmById(id);
-                                //ForeignCollection need to be retrieved from inserted record
-                                ForeignCollection<Day> days = alarmFinal.getDays();
-                                for(Day d : mDataCollector.getInstance().getTempDays()){
-                                    days.add(d);
+                            if(QRoclockApplication.sharedPreferences.getString(QRScannerActivity.REFFERAL_QR, null) != null){
+                                Integer id = AlarmsManager.getInstance(getActivity()).createAlarm(a);
+                                if(mDataCollector.getInstance().getTempDays().size() > 0) {
+                                    Alarm alarmFinal = AlarmsManager.getInstance(getActivity()).readAlarmById(id);
+                                    //ForeignCollection need to be retrieved from inserted record
+                                    ForeignCollection<Day> days = alarmFinal.getDays();
+                                    for(Day d : mDataCollector.getInstance().getTempDays()){
+                                        days.add(d);
+                                    }
                                 }
-                            }
 
-                            Intent intent = new Intent(mParent, AlarmHandlingService.class);
-                            intent.putExtra(AlarmHandlingService.ALARM_TIME, a.getTime());
-                            intent.putExtra(AlarmHandlingService.ALARM_RINGTONE, a.getRingtoneUri());
-                            mParent.startService(intent);
-                            mParent.formConfirmed();
-                            alertDialog.dismiss();
+                                Intent intent = new Intent(mParent, AlarmHandlingService.class);
+                                intent.putExtra(AlarmHandlingService.ALARM_TIME, a.getTime());
+                                intent.putExtra(AlarmHandlingService.ALARM_RINGTONE, a.getRingtoneUri());
+                                mParent.startService(intent);
+                                mParent.formConfirmed();
+                                alertDialog.dismiss();
+                            } else {
+                                Toast.makeText(mParent, "You should calibrate QR Code first...", Toast.LENGTH_SHORT).show();
+                            }
                         } else {
                             Toast.makeText(mParent, "You should provide alarm time first...", Toast.LENGTH_SHORT).show();
                         }

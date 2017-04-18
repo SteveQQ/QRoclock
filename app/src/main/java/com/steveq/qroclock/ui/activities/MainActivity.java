@@ -37,6 +37,7 @@ public class MainActivity extends AppCompatActivity implements DataCollector{
     private static String TAG = MainActivity.class.getSimpleName();
     private Alarm mAlarm;
     private AlarmsRecyclerViewAdapter mAdapter;
+    private static int GET_REFFERAL_QR = 20;
 
     //-------DECLARE VIEW HANDLES START--------//
 
@@ -92,13 +93,13 @@ public class MainActivity extends AppCompatActivity implements DataCollector{
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_calibrate) {
+            Intent intent = new Intent(this, QRScannerActivity.class);
+            intent.putExtra(QRScannerActivity.GET_STATE, QRScannerActivity.CALIBRATE);
+            startActivity(intent);
             return true;
         }
 
@@ -111,11 +112,9 @@ public class MainActivity extends AppCompatActivity implements DataCollector{
 
     @OnClick(R.id.fab)
     public void fabClick(View v){
-//        FragmentTransaction ft = getFragmentManager().beginTransaction();
-//        ft.addToBackStack(null);
-//        AlarmConfigDialog.newInstance(false, -1).show(ft, null);
-        Intent intent = new Intent(this, AlarmRingActivity.class);
-        startActivity(intent);
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        ft.addToBackStack(null);
+        AlarmConfigDialog.newInstance(false, -1).show(ft, null);
     }
 
     @Override
@@ -126,6 +125,8 @@ public class MainActivity extends AppCompatActivity implements DataCollector{
             if(requestCode == AlarmConfigDialog.GET_RINGTONE) {
                 Uri uri = data.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI);
                 Log.d(TAG, uri.toString());
+            } else if(requestCode == GET_REFFERAL_QR){
+
             }
         }
     }

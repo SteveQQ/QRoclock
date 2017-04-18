@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.steveq.qroclock">
-    <uses-permission android:name="android.permission.CAMERA"/>
+
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <application
         android:name=".QRoclockApplication"
@@ -24,13 +25,13 @@
         <service
             android:name=".service.AlarmHandlingService"
             android:enabled="true"
-            android:exported="false" >
+            android:exported="false">
             <intent-filter>
-                <action android:name="com.steveq.qroclock.ALARM_STOP"/>
+                <action android:name="com.steveq.qroclock.ALARM_STOP" />
             </intent-filter>
         </service>
 
-        <activity android:name=".ui.activities.AlarmRingActivity"/>
+        <activity android:name=".ui.activities.QRScannerActivity" />
     </application>
 
 </manifest>

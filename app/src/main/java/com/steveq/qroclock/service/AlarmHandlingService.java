@@ -22,7 +22,7 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.steveq.qroclock.R;
-import com.steveq.qroclock.ui.activities.AlarmRingActivity;
+import com.steveq.qroclock.ui.activities.QRScannerActivity;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -76,8 +76,8 @@ public class AlarmHandlingService extends Service implements RunnableCallback{
     @Override
     public void timeHasCome(Runnable r, AlarmInfo info) {
         mTasksToExecute.remove(r);
-        Intent intent = new Intent(this, AlarmRingActivity.class);
-        intent.putExtra(ALARM_RINGTONE, info.getRingtone());
+        Intent intent = new Intent(this, QRScannerActivity.class);
+        intent.putExtra(QRScannerActivity.GET_STATE, QRScannerActivity.STOP_WAKING);
         startActivity(intent);
         Uri ringUri = Uri.parse(info.getRingtone());
         mRingtone = RingtoneManager.getRingtone(this, ringUri);
@@ -89,7 +89,7 @@ public class AlarmHandlingService extends Service implements RunnableCallback{
 
     private void updateNotification(String time) {
         NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        Intent intent = new Intent(this, AlarmRingActivity.class);
+        Intent intent = new Intent(this, QRScannerActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         Notification not = new Notification.Builder(this)
                 .setContentTitle("It's QR O'clock !!!")
