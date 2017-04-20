@@ -20,6 +20,7 @@
     <string name="delete">Delete</string>
     <string name="tomorrow">Tomorrow</string>
     <string name="calibrate">calibrate</string>
+    <string name="today">Today</string>
     <string-array name="days">
         <item>Monday</item>
         <item>Tuesday</item>

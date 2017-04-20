@@ -19,8 +19,13 @@ import com.steveq.qroclock.repo.Day;
 import com.steveq.qroclock.repo.Days;
 import com.steveq.qroclock.ui.dialogs.AlarmConfigDialog;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class AlarmsRecyclerViewAdapter extends RecyclerView.Adapter<AlarmsRecyclerViewAdapter.AlarmsViewHolder> {
     private static final String TAG = AlarmConfigDialog.class.getSimpleName();
@@ -55,7 +60,18 @@ public class AlarmsRecyclerViewAdapter extends RecyclerView.Adapter<AlarmsRecycl
         if(mAlarms.get(position).getDays() != null && alarm.getDays().size()>0){
             holder.daysRepsTextView.setText(AlarmConfigDialog.getDaysAbbrsString(new ArrayList<>(alarm.getDays())));
         } else {
-            holder.daysRepsTextView.setText(R.string.tomorrow);
+            Calendar calendar = Calendar.getInstance();
+            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.GERMANY);
+            try {
+                Date alarmTime = sdf.parse(alarm.getTime());
+                if(alarmTime.after(sdf.parse(sdf.format(calendar.getTime())))){
+                    holder.daysRepsTextView.setText(R.string.today);
+                } else {
+                    holder.daysRepsTextView.setText(R.string.tomorrow);
+                }
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
         }
 
         holder.alarmActiveSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
