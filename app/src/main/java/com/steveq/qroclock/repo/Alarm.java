@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @DatabaseTable(tableName = "alarms")
-public class Alarm implements Parcelable{
+public class Alarm{
     @DatabaseField(generatedId = true)
     private Integer id;
 
@@ -100,12 +100,30 @@ public class Alarm implements Parcelable{
     }
 
     @Override
-    public int describeContents() {
-        return 0;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Alarm alarm = (Alarm) o;
+
+        if (id != null ? !id.equals(alarm.id) : alarm.id != null) return false;
+        if (time != null ? !time.equals(alarm.time) : alarm.time != null) return false;
+        if (active != null ? !active.equals(alarm.active) : alarm.active != null) return false;
+        if (days != null ? !days.equals(alarm.days) : alarm.days != null) return false;
+        if (ringtoneUri != null ? !ringtoneUri.equals(alarm.ringtoneUri) : alarm.ringtoneUri != null)
+            return false;
+        return tempDays != null ? tempDays.equals(alarm.tempDays) : alarm.tempDays == null;
+
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
-
+    public int hashCode() {
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (time != null ? time.hashCode() : 0);
+        result = 31 * result + (active != null ? active.hashCode() : 0);
+        result = 31 * result + (days != null ? days.hashCode() : 0);
+        result = 31 * result + (ringtoneUri != null ? ringtoneUri.hashCode() : 0);
+        result = 31 * result + (tempDays != null ? tempDays.hashCode() : 0);
+        return result;
     }
 }

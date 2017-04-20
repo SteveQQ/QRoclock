@@ -63,6 +63,20 @@ public class AlarmsManager {
         return results;
     }
 
+    public List<Alarm> readActiveAlarms(){
+        List<Alarm> results = new ArrayList<>();
+        try {
+            Log.d(TAG, "Reading Alarms List...");
+            QueryBuilder<Alarm, Integer> queryBuilder = getHelper().getAlarmDao().queryBuilder();
+            queryBuilder.where().eq("active", true);
+            results = queryBuilder.query();
+        } catch (SQLException e) {
+            Log.d(TAG, "Reading Alarms List FAILED");
+            e.printStackTrace();
+        }
+        return results;
+    }
+
     public Alarm readAlarmById(Integer id){
         Alarm result = null;
         try {
@@ -82,6 +96,7 @@ public class AlarmsManager {
             UpdateBuilder<Alarm, Integer> updateBuilder = getHelper().getAlarmDao().updateBuilder();
             updateBuilder.where().eq("id", alarm.getId());
             updateBuilder.updateColumnValue("time", alarm.getTime());
+            updateBuilder.update();
         } catch (SQLException e){
             Log.d(TAG, "Updating Alarm Time FAILED");
             e.printStackTrace();
@@ -94,6 +109,7 @@ public class AlarmsManager {
             UpdateBuilder<Alarm, Integer> updateBuilder = getHelper().getAlarmDao().updateBuilder();
             updateBuilder.where().eq("id", alarm.getId());
             updateBuilder.updateColumnValue("active", alarm.getActive());
+            updateBuilder.update();
         }catch (SQLException e){
             Log.d(TAG, "Updating Alarm Active Status FAILED");
             e.printStackTrace();
@@ -106,6 +122,7 @@ public class AlarmsManager {
             UpdateBuilder<Alarm, Integer> updateBuilder = getHelper().getAlarmDao().updateBuilder();
             updateBuilder.where().eq("id", alarm.getId());
             updateBuilder.updateColumnValue("ringtoneUri", alarm.getRingtoneUri());
+            updateBuilder.update();
         } catch (SQLException e){
             Log.d(TAG, "Updating Alarm Ringtone Uri FAILED");
             e.printStackTrace();

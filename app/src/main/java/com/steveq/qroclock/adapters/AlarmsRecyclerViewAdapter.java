@@ -3,6 +3,7 @@ package com.steveq.qroclock.adapters;
 
 import android.app.Activity;
 import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +18,7 @@ import com.steveq.qroclock.database.AlarmsManager;
 import com.steveq.qroclock.repo.Alarm;
 import com.steveq.qroclock.repo.Day;
 import com.steveq.qroclock.repo.Days;
+import com.steveq.qroclock.service.AlarmHandlingService;
 import com.steveq.qroclock.ui.dialogs.AlarmConfigDialog;
 
 import java.text.ParseException;
@@ -83,6 +85,9 @@ public class AlarmsRecyclerViewAdapter extends RecyclerView.Adapter<AlarmsRecycl
                 alarm.setActive(false);
             }
             AlarmsManager.getInstance(mActivity).updateAlarmActiveStatus(mAlarms.get(pos));
+            Intent intent = new Intent(mActivity, AlarmHandlingService.class);
+            intent.setAction("com.steveq.qroclock.UPDATE_ALARM");
+            mActivity.startService(intent);
             }
         });
 

@@ -22,9 +22,12 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.steveq.qroclock.R;
+import com.steveq.qroclock.database.AlarmsManager;
+import com.steveq.qroclock.repo.Alarm;
 import com.steveq.qroclock.ui.activities.QRScannerActivity;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -45,7 +48,7 @@ public class AlarmHandlingService extends Service implements RunnableCallback{
     private Boolean isWaking;
 
     private static int numTicks = 0;
-    private Set<Runnable> mTasksToExecute;
+    private Set<AlarmRunnable> mTasksToExecute;
 
     public class AlarmInfo {
         private String time;
@@ -74,17 +77,16 @@ public class AlarmHandlingService extends Service implements RunnableCallback{
     }
 
     @Override
-    public void timeHasCome(Runnable r, AlarmInfo info) {
-        mTasksToExecute.remove(r);
+    public void timeHasCome(Runnable r, Alarm alarm) {
         Intent intent = new Intent(this, QRScannerActivity.class);
         intent.putExtra(QRScannerActivity.GET_STATE, QRScannerActivity.STOP_WAKING);
         startActivity(intent);
-        Uri ringUri = Uri.parse(info.getRingtone());
+        Uri ringUri = Uri.parse(alarm.getRingtoneUri());
         mRingtone = RingtoneManager.getRingtone(this, ringUri);
         isWaking = true;
 
-        updateNotification(info.getTime());
-        wakeUp();
+        updateNotification(alarm.getTime());
+        wakeUp(alarm);
     }
 
     private void updateNotification(String time) {
@@ -92,16 +94,18 @@ public class AlarmHandlingService extends Service implements RunnableCallback{
         Intent intent = new Intent(this, QRScannerActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         Notification not = new Notification.Builder(this)
-                .setContentTitle("It's QR O'clock !!!")
-                .setContentText("It's " + time + " - tap to have another chance to dismiss alarm")
+                .setContentTitle("QR O'clock")
+                .setContentText("You have active alarms.")
                 .setContentIntent(pendingIntent)
                 .setSmallIcon(R.drawable.ic_alarm_vec)
                 .build();
         manager.notify(FOREGROUND_ID, not);
     }
 
-    private void wakeUp(){
+    private void wakeUp(final Alarm alarm){
         final AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+
+        //Playing ringtone in separate thread because it blocked UI thread
         HandlerThread thread = new HandlerThread("Ringtone play thread");
         thread.start();
         Handler handler = new Handler(thread.getLooper());
@@ -109,16 +113,16 @@ public class AlarmHandlingService extends Service implements RunnableCallback{
         handler.post(new Runnable() {
             @Override
             public void run() {
-            while(isWaking){
-                if(!mRingtone.isPlaying()) {
-                    mRingtone.play();
-                    audioManager.setStreamVolume(AudioManager.STREAM_RING, audioManager.getStreamMaxVolume(AudioManager.STREAM_RING), 0);
+                while(isWaking){
+                    if(!mRingtone.isPlaying()) {
+                        mRingtone.play();
+                        //volume ringtone up
+                        audioManager.setStreamVolume(AudioManager.STREAM_RING, audioManager.getStreamMaxVolume(AudioManager.STREAM_RING), 0);
+                    }
                 }
-            }
-            if(mTasksToExecute.size() == 0){
-                Log.d(TAG, "Stopping the service...");
-                stopSelf();
-            }
+                alarm.setActive(false);
+                AlarmsManager.getInstance(AlarmHandlingService.this).updateAlarmActiveStatus(alarm);
+                updateTasks();
             }
         });
     }
@@ -141,14 +145,14 @@ public class AlarmHandlingService extends Service implements RunnableCallback{
         mTimeTickReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                String action = intent.getAction();
-                if(action.equals(Intent.ACTION_TIME_TICK)){
-                    Log.d(TAG, "Runnables to run : " + mTasksToExecute.size());
-
-                    for(Runnable r : mTasksToExecute){
-                        mServiceHandler.post(r);
-                    }
+            String action = intent.getAction();
+            if(action.equals(Intent.ACTION_TIME_TICK)){
+                Log.d(TAG, "Runnables to run : " + mTasksToExecute.size());
+                for(Runnable r : mTasksToExecute){
+                    mServiceHandler.post(r);
                 }
+                updateTasks();
+            }
             }
         };
         IntentFilter filter = new IntentFilter();
@@ -159,6 +163,7 @@ public class AlarmHandlingService extends Service implements RunnableCallback{
             @Override
             public void onReceive(Context context, Intent intent) {
                 isWaking = false;
+
             }
         };
         filter = new IntentFilter();
@@ -180,19 +185,40 @@ public class AlarmHandlingService extends Service implements RunnableCallback{
 
         b.setOngoing(true)
                 .setContentTitle("QR O'clock")
-                .setContentText("You have active alarms")
+                .setContentText("You have active alarms.")
                 .setSmallIcon(R.drawable.ic_alarm_vec);
 
         return(b.build());
     }
 
+    private void updateTasks(){
+        List<Alarm> activeAlarms = AlarmsManager.getInstance(this).readActiveAlarms();
+        Log.d(TAG, activeAlarms.toString());
+        if(activeAlarms.size() > 0){
+            if(mTasksToExecute.size() > 0){
+                for(Alarm alarm : activeAlarms){
+                    for(AlarmRunnable runnable : mTasksToExecute){
+                        if(alarm.equals(runnable.getmAlarm())){
+                            runnable.setmAlarm(alarm);
+                        }
+                    }
+                }
+            } else {
+                for(Alarm alarm :activeAlarms){
+                    mTasksToExecute.add(new AlarmRunnable(alarm, AlarmHandlingService.this));
+                }
+            }
+        } else {
+            mTasksToExecute = null;
+            stopSelf();
+        }
+    }
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(TAG, "onStartCommand");
-
-        if(!"com.steveq.qroclock.ALARM_STOP".equals(intent.getAction())) {
-            AlarmInfo aInfo = new AlarmInfo(intent.getStringExtra(ALARM_TIME), intent.getStringExtra(ALARM_RINGTONE));
-            mTasksToExecute.add(new AlarmRunnable(aInfo, AlarmHandlingService.this));
+        if("com.steveq.qroclock.UPDATE_ALARM".equals(intent.getAction())){
+            Log.d(TAG, "Updating alarms tasks...");
+            updateTasks();
         }
         return START_STICKY;
     }
@@ -200,7 +226,6 @@ public class AlarmHandlingService extends Service implements RunnableCallback{
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.d(TAG, "Unregister Receiver");
         unregisterReceiver(mTimeTickReceiver);
         unregisterReceiver(mAlarmStopReceiver);
     }

@@ -137,8 +137,11 @@ public class AlarmConfigDialog extends DialogFragment {
                     @Override
                     public void onClick(View v) {
                         Alarm a = mDataCollector.getInstance();
+                        //If time was set
                         if(a.getTime() != null && !a.getTime().equals("")){
+                            //If QRcode was saved in shared preferences
                             if(QRoclockApplication.sharedPreferences.getString(QRScannerActivity.REFFERAL_QR, null) != null){
+                                //Create alarm
                                 Integer id = AlarmsManager.getInstance(getActivity()).createAlarm(a);
                                 if(mDataCollector.getInstance().getTempDays().size() > 0) {
                                     Alarm alarmFinal = AlarmsManager.getInstance(getActivity()).readAlarmById(id);
@@ -152,6 +155,7 @@ public class AlarmConfigDialog extends DialogFragment {
                                 Intent intent = new Intent(mParent, AlarmHandlingService.class);
                                 intent.putExtra(AlarmHandlingService.ALARM_TIME, a.getTime());
                                 intent.putExtra(AlarmHandlingService.ALARM_RINGTONE, a.getRingtoneUri());
+                                intent.setAction("com.steveq.qroclock.UPDATE_ALARM");
                                 mParent.startService(intent);
                                 mParent.formConfirmed();
                                 alertDialog.dismiss();

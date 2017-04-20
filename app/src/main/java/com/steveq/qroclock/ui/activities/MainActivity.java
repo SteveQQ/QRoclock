@@ -60,19 +60,26 @@ public class MainActivity extends AppCompatActivity implements DataCollector{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "onCreate");
         setContentView(R.layout.activity_main);
 
         ButterKnife.bind(this);
 
         setSupportActionBar(toolbar);
 
-        mAdapter = new AlarmsRecyclerViewAdapter(this);
 
+        AlarmsManager.getInstance(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        mAdapter = new AlarmsRecyclerViewAdapter(this);
         alarmsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         alarmsRecyclerView.setAdapter(mAdapter);
 
         prepareRecyclerViewSpace();
-        AlarmsManager.getInstance(this);
     }
 
     //-------LIFECYCLE METHODS END--------//

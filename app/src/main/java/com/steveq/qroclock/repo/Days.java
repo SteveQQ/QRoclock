@@ -19,6 +19,10 @@ public enum Days {
         this.abb = abb;
     }
 
+    public Integer getDayNum() {
+        return dayNum;
+    }
+
     public String getAbb() {
         return abb;
     }
