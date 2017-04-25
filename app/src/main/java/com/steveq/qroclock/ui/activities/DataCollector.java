@@ -10,6 +10,7 @@ import java.util.List;
 
 public interface DataCollector {
     void init();
+    void init(Alarm alarm);
     void withTime(String time);
     void withRepetition(ForeignCollection<Day> days);
     void withRingtone(String ringtone);

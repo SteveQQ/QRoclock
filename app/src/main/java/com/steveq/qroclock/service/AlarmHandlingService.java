@@ -92,6 +92,7 @@ public class AlarmHandlingService extends Service implements RunnableCallback{
     private void updateNotification(String time) {
         NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         Intent intent = new Intent(this, QRScannerActivity.class);
+        intent.putExtra(QRScannerActivity.GET_STATE, QRScannerActivity.STOP_WAKING);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         Notification not = new Notification.Builder(this)
                 .setContentTitle("QR O'clock")
@@ -120,7 +121,6 @@ public class AlarmHandlingService extends Service implements RunnableCallback{
                         audioManager.setStreamVolume(AudioManager.STREAM_RING, audioManager.getStreamMaxVolume(AudioManager.STREAM_RING), 0);
                     }
                 }
-                alarm.setActive(false);
                 AlarmsManager.getInstance(AlarmHandlingService.this).updateAlarmActiveStatus(alarm);
                 updateTasks();
             }

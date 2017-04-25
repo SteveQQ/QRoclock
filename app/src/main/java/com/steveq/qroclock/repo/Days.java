@@ -3,13 +3,13 @@ package com.steveq.qroclock.repo;
 import com.j256.ormlite.table.DatabaseTable;
 
 public enum Days {
-    MONDAY(1, "mon."),
-    TUESDAY(2, "tue."),
-    WEDNESDAY(3, "wed."),
-    THURSDAY(4, "thu."),
-    FRIDAY(5, "fri."),
-    SATURDAY(6, "sat."),
-    SUNDAY(7, "sun.");
+    MONDAY(2, "mon."),
+    TUESDAY(3, "tue."),
+    WEDNESDAY(4, "wed."),
+    THURSDAY(5, "thu."),
+    FRIDAY(6, "fri."),
+    SATURDAY(7, "sat."),
+    SUNDAY(1, "sun.");
 
     Integer dayNum;
     String abb;

@@ -102,9 +102,8 @@ public class AlarmConfigDialog extends DialogFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mParent = (MainActivity) getActivity();
-        mDataCollector = mParent;
-        mDataCollector.init();
         isDeletable = getArguments().getBoolean(DELETABLE);
+
         if(isDeletable){
             Integer curId = getArguments().getInt(SELECTED);
             if(curId >= 0) {
@@ -112,6 +111,13 @@ public class AlarmConfigDialog extends DialogFragment {
             } else {
                 throw new IllegalArgumentException("Pass valid Id");
             }
+        }
+
+        mDataCollector = mParent;
+        if(!isDeletable){
+            mDataCollector.init();
+        } else {
+            mDataCollector.init(currentSelected);
         }
     }
 
@@ -142,21 +148,30 @@ public class AlarmConfigDialog extends DialogFragment {
                             //If QRcode was saved in shared preferences
                             if(QRoclockApplication.sharedPreferences.getString(QRScannerActivity.REFFERAL_QR, null) != null){
                                 //Create alarm
-                                Integer id = AlarmsManager.getInstance(getActivity()).createAlarm(a);
-                                if(mDataCollector.getInstance().getTempDays().size() > 0) {
-                                    Alarm alarmFinal = AlarmsManager.getInstance(getActivity()).readAlarmById(id);
-                                    //ForeignCollection need to be retrieved from inserted record
-                                    ForeignCollection<Day> days = alarmFinal.getDays();
-                                    for(Day d : mDataCollector.getInstance().getTempDays()){
-                                        days.add(d);
+                                if(!isDeletable) {
+                                    Integer id = AlarmsManager.getInstance(getActivity()).createAlarm(a);
+                                    if (mDataCollector.getInstance().getTempDays().size() > 0) {
+                                        Alarm alarmFinal = AlarmsManager.getInstance(getActivity()).readAlarmById(id);
+                                        //ForeignCollection need to be retrieved from inserted record
+                                        ForeignCollection<Day> days = alarmFinal.getDays();
+                                        for (Day d : mDataCollector.getInstance().getTempDays()) {
+                                            days.add(d);
+                                        }
                                     }
-                                }
 
-                                Intent intent = new Intent(mParent, AlarmHandlingService.class);
-                                intent.putExtra(AlarmHandlingService.ALARM_TIME, a.getTime());
-                                intent.putExtra(AlarmHandlingService.ALARM_RINGTONE, a.getRingtoneUri());
-                                intent.setAction("com.steveq.qroclock.UPDATE_ALARM");
-                                mParent.startService(intent);
+                                    Intent intent = new Intent(mParent, AlarmHandlingService.class);
+//                                    intent.putExtra(AlarmHandlingService.ALARM_TIME, a.getTime());
+//                                    intent.putExtra(AlarmHandlingService.ALARM_RINGTONE, a.getRingtoneUri());
+                                    intent.setAction("com.steveq.qroclock.UPDATE_ALARM");
+                                    mParent.startService(intent);
+                                } else {
+                                    AlarmsManager.getInstance(getActivity()).updateAlarmTime(a);
+                                    AlarmsManager.getInstance(getActivity()).updateAlarmRingtoneUri(a);
+                                    //TODO: Updating Days Repeating
+                                    Intent intent = new Intent(mParent, AlarmHandlingService.class);
+                                    intent.setAction("com.steveq.qroclock.UPDATE_ALARM");
+                                    mParent.startService(intent);
+                                }
                                 mParent.formConfirmed();
                                 alertDialog.dismiss();
                             } else {

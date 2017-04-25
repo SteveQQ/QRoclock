@@ -163,6 +163,11 @@ public class MainActivity extends AppCompatActivity implements DataCollector{
     }
 
     @Override
+    public void init(Alarm alarm) {
+        mAlarm = alarm;
+    }
+
+    @Override
     public void withTime(String time) {
         mAlarm.setTime(time);
     }

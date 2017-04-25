@@ -45,13 +45,16 @@ public class AlarmRunnable implements Runnable {
 
         int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
 
+        Log.d(TAG, "DAY OF WEEK" + dayOfWeek);
         //If days to repeat are set
         if(mAlarm.getDays().size() > 0){
             //For every day set for alarm
             for(Day d : mAlarm.getDays()){
                 //If day of week is equals current day of Week
+                Log.d(TAG, Days.valueOf(d.getDayName()).getDayNum() + "");
                 if(Days.valueOf(d.getDayName()).getDayNum() == dayOfWeek){
                     //If time matches
+                    Log.d(TAG, "Current Time in Day Repeating : " + curTime);
                     if(curTime.equals(mAlarm.getTime())){
                         //ring
                         mCallback.timeHasCome(this, mAlarm);
