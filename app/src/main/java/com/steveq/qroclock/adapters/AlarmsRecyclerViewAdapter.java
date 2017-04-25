@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -60,6 +61,7 @@ public class AlarmsRecyclerViewAdapter extends RecyclerView.Adapter<AlarmsRecycl
         final Alarm alarm = mAlarms.get(position);
 
         if(mAlarms.get(position).getDays() != null && alarm.getDays().size()>0){
+            Log.d(TAG, "Days in Alarm : " + alarm.getDays().size());
             holder.daysRepsTextView.setText(AlarmConfigDialog.getDaysAbbrsString(new ArrayList<>(alarm.getDays())));
         } else {
             Calendar calendar = Calendar.getInstance();

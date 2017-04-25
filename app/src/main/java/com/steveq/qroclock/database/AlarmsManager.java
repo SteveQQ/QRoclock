@@ -129,23 +129,6 @@ public class AlarmsManager {
         }
     }
 
-    public void updateAlarmDays(Alarm alarm, ForeignCollection<Day> daysToUpdate){
-        try{
-            Log.d(TAG, "Updating Alarm Repetition Days");
-            UpdateBuilder<Alarm, Integer> updateBuilder = getHelper().getAlarmDao().updateBuilder();
-            updateBuilder.where().eq("id", alarm.getId());
-            alarm.getDays().clear();
-            alarm.getDays().updateAll();
-            for(Day d : daysToUpdate){
-                alarm.getDays().add(d);
-            }
-        } catch (SQLException e){
-            Log.d(TAG, "Updating Alarm Repetition Days FAILED");
-            e.printStackTrace();
-        }
-        Log.d(TAG, "Updated days" + alarm.getDays());
-    }
-
     public void deleteAlarm(Alarm alarm){
         try{
             Log.d(TAG, "Deleting Alarm : " + alarm);

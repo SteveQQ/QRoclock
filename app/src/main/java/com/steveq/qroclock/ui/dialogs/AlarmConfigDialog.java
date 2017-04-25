@@ -34,6 +34,7 @@ import com.steveq.qroclock.ui.activities.DataCollector;
 import com.steveq.qroclock.ui.activities.MainActivity;
 import com.steveq.qroclock.ui.activities.QRScannerActivity;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -167,7 +168,19 @@ public class AlarmConfigDialog extends DialogFragment {
                                 } else {
                                     AlarmsManager.getInstance(getActivity()).updateAlarmTime(a);
                                     AlarmsManager.getInstance(getActivity()).updateAlarmRingtoneUri(a);
-                                    //TODO: Updating Days Repeating
+
+                                    ForeignCollection<Day> days = a.getDays();
+                                    for(Day d : days){
+                                        days.remove(d);
+                                    }
+
+                                    Log.d(TAG, "Temp Days : " + mDataCollector.getInstance().getTempDays());
+                                    for(Day d : mDataCollector.getInstance().getTempDays()){
+                                        days.add(d);
+                                    }
+
+                                    //AlarmsManager.getInstance(getActivity()).updateAlarmDays(a, days);
+
                                     Intent intent = new Intent(mParent, AlarmHandlingService.class);
                                     intent.setAction("com.steveq.qroclock.UPDATE_ALARM");
                                     mParent.startService(intent);
@@ -200,6 +213,7 @@ public class AlarmConfigDialog extends DialogFragment {
             deleteAlarmImageButton.setVisibility(View.GONE);
         }
         updateRingtone();
+        updateDaysRep();
 
         return alertDialog;
     }
