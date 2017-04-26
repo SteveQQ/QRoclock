@@ -121,6 +121,7 @@ public class AlarmHandlingService extends Service implements RunnableCallback{
                         audioManager.setStreamVolume(AudioManager.STREAM_RING, audioManager.getStreamMaxVolume(AudioManager.STREAM_RING), 0);
                     }
                 }
+                mRingtone.stop();
                 AlarmsManager.getInstance(AlarmHandlingService.this).updateAlarmActiveStatus(alarm);
                 updateTasks();
             }
