@@ -12,6 +12,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.google.zxing.ResultPoint;
@@ -48,6 +49,7 @@ public class QRScannerActivity extends AppCompatActivity implements BarcodeCallb
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_qrscanner);
         ButterKnife.bind(this);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON | WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON);
 
         Intent receivedIntent = getIntent();
         currentState = receivedIntent.getIntExtra(GET_STATE, 0);
@@ -57,7 +59,6 @@ public class QRScannerActivity extends AppCompatActivity implements BarcodeCallb
         } else if(currentState == CALIBRATE){
             barcodeView.setStatusText("Set QR for stopping alarms");
         }
-
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED){
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
                 showExplanation("Permission Needed", "Camera", Manifest.permission.CAMERA);

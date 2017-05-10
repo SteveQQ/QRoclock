@@ -1,5 +1,7 @@
 package com.steveq.qroclock.service;
 
+import android.app.Activity;
+import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -17,9 +19,11 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PowerManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import android.view.WindowManager;
 
 import com.steveq.qroclock.R;
 import com.steveq.qroclock.database.AlarmsManager;
@@ -46,6 +50,7 @@ public class AlarmHandlingService extends Service implements RunnableCallback{
     private BroadcastReceiver mAlarmStopReceiver = null;
     private Ringtone mRingtone;
     private Boolean isWaking;
+    PowerManager.WakeLock wl;
 
     private static int numTicks = 0;
     private Set<AlarmRunnable> mTasksToExecute;
@@ -106,6 +111,9 @@ public class AlarmHandlingService extends Service implements RunnableCallback{
     private void wakeUp(final Alarm alarm){
         final AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
 
+        //unlockScreen();
+
+
         //Playing ringtone in separate thread because it blocked UI thread
         HandlerThread thread = new HandlerThread("Ringtone play thread");
         thread.start();
@@ -121,11 +129,24 @@ public class AlarmHandlingService extends Service implements RunnableCallback{
                         audioManager.setStreamVolume(AudioManager.STREAM_RING, audioManager.getStreamMaxVolume(AudioManager.STREAM_RING), 0);
                     }
                 }
+                wl.release();
                 mRingtone.stop();
                 AlarmsManager.getInstance(AlarmHandlingService.this).updateAlarmActiveStatus(alarm);
                 updateTasks();
             }
         });
+    }
+
+    private void unlockScreen() {
+        PowerManager manager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        PowerManager.WakeLock wl = manager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK|PowerManager.ACQUIRE_CAUSES_WAKEUP, "TAG");
+        wl.acquire();
+        Log.d(TAG, "Wake lock acquired");
+//        getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
+//                | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
+//                | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+//                | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+//                | WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON);
     }
 
     private final class ServiceHandler extends Handler{
@@ -142,6 +163,11 @@ public class AlarmHandlingService extends Service implements RunnableCallback{
     @Override
     public void onCreate() {
         Log.d(TAG, "onCreate");
+
+        PowerManager manager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        wl = manager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK|PowerManager.ACQUIRE_CAUSES_WAKEUP, "TAG");
+        wl.acquire();
+        Log.d(TAG, "Wake lock acquired");
 
         mTimeTickReceiver = new BroadcastReceiver() {
             @Override
