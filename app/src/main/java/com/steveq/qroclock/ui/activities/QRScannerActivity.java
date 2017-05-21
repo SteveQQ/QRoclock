@@ -46,10 +46,10 @@ public class QRScannerActivity extends AppCompatActivity implements BarcodeCallb
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON | WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_qrscanner);
         ButterKnife.bind(this);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON | WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON);
 
         Intent receivedIntent = getIntent();
         currentState = receivedIntent.getIntExtra(GET_STATE, 0);
@@ -130,6 +130,7 @@ public class QRScannerActivity extends AppCompatActivity implements BarcodeCallb
                     QRoclockApplication.editor.commit();
                     Toast.makeText(this, "QR Code Calibrated correctly", Toast.LENGTH_LONG).show();
                     finish();
+                    //finishAndRemoveTask();
                 } else if(currentState == STOP_WAKING){
                     String qr = QRoclockApplication.sharedPreferences.getString(REFFERAL_QR, null);
                     if(qr != null) {

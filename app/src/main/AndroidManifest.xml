@@ -4,6 +4,7 @@
 
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
 
     <application
         android:name=".QRoclockApplication"
@@ -33,7 +34,8 @@
             </intent-filter>
         </service>
 
-        <activity android:name=".ui.activities.QRScannerActivity" />
+        <activity android:name=".ui.activities.QRScannerActivity"
+            android:autoRemoveFromRecents="true"/>
     </application>
 
 </manifest>
